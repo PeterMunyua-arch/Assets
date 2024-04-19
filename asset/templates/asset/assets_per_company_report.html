@@ -1,0 +1,16 @@
+
+{% extends 'asset/base.html' %}
+{% block title %} Return Asset {% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Assets per Company Report</h2>
+{% for company, assets in assets_per_company.items %}
+  <h3>{{ company }}</h3>
+  <ul>
+    {% for asset in assets %}
+      <li>{{ asset.name }}</li>
+    {% endfor %}
+  </ul>
+{% endfor %}
+</div>
+{% endblock %}

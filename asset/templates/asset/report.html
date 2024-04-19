@@ -1,0 +1,44 @@
+{% extends 'asset/base.html' %}
+{% block title %} Return Asset {% endblock %}
+{% block content %}
+<div class="container">
+    <h1>All Assets</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Model</th>
+                <th>Specs</th>
+                <th>Ram</th>
+                <th>Purchase Price</th>
+                <th>Purchase Date</th>
+                <th>Serial Number</th>
+                <th>Company</th>
+                <!-- Add more columns as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for asset in assets %}
+            <tr>
+                <td>{{ asset.name }}</td>
+                <td>{{ asset.model }}</td>
+                <td>{{ asset.specs }}</td>
+                <td>{{ asset.ram }}</td>
+                <td>{{ asset.purchase_price }}</td>
+                <td>{{ asset.purchase_date }}</td>
+                <td>{{ asset.serial_number }}</td>
+                <td>{{ asset.company }}</td>
+                <!-- Add more columns as needed -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+
+    <ul class="reports-list">
+        <li><a href="{% url 'unallocated_assets_report' %}">Unallocated Assets Report</a></li>
+        <li><a href="{% url 'allocated_assets_report' %}">Assets Allocated</a></li>
+    
+    </ul>
+</div>
+{% endblock %}

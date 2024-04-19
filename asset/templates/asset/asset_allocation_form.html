@@ -1,0 +1,13 @@
+{% extends 'asset/base.html' %}
+
+{% block content %}
+<div class="container">
+    
+    <form class="issue-asset-form" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    
+</div>
+{% endblock %}

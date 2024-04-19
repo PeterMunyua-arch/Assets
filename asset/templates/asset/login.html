@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: space-between; /* Aligns items horizontally with space between */
+            align-items: center; /* Aligns items vertically */
+            min-height: 100vh; /* Ensures full height of the viewport */
+        }
+
+        .logo {
+            /* Add styles for the logo container */
+            margin-left: 20px; /* Adjust margin as needed */
+        }
+
+        
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.logo img {
+    width: 120%;
+    max-width: 100%; /* Ensure the image does not exceed its original size */
+    height: 730px; /* Maintain aspect ratio */
+}
+
+.login-container {
+            /* Add styles for the login form container */
+            padding: 20px; /* Add padding as needed */
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-right: 50px;
+            width: 400px; /* Set the width of the login form container */
+            margin-top: 40px;
+        }
+
+        /* Style for the login form */
+        .login-form input[type="text"],
+        .login-form input[type="password"],
+        .login-form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Ensures padding and border are included in width */
+        }
+
+        .login-form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .login-form button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Media query for responsiveness */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stacks items vertically on smaller screens */
+                align-items: stretch; /* Stretches items vertically */
+            }
+
+            .login-container {
+                width: 100%; /* Make form container full width on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo section -->
+    <div class="logo">
+        <!-- Your logo image or content goes here -->
+        <img src="{% static 'asset/logo.png' %}" alt="Logo">
+        <!-- Example: <img src="path_to_your_logo_image" alt="Logo"> -->
+    </div>
+
+    <!-- Login form container -->
+    <div class="login-container">
+        <h1>Login</h1>
+        <form class="login-form" method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+            <button type="submit">Login</button>
+            <label>
+                <input type="checkbox" checked="checked" name="remember"> Remember me
+              </label>
+              <div class="container" style="background-color:#f1f1f1">
+                <span class="psw">Forgot <a href="{% url 'password_reset' %}">password?</a></span>
+              </div>
+        </form>
+    </div>
+</body>
+</html>

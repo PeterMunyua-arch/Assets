@@ -1,0 +1,27 @@
+{% extends 'asset/base.html' %}
+{% block title %} Assign Asset {% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Allocated Assets Report</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Asset Name</th>
+                <th>Serial Number</th>
+                <th>Employee Allocated</th>
+                <th>Allocation Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for asset_allocation in allocated_assets %}
+                <tr>
+                    <td>{{ asset_allocation.asset.name }}</td>
+                    <td>{{ asset_allocation.serial_number }}</td>
+                    <td>{{ asset_allocation.employee_allocated }}</td>
+                    <td>{{ asset_allocation.allocation_date }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

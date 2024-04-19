@@ -1,0 +1,29 @@
+<!-- asset_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asset List</title>
+</head>
+<body>
+    <h1>Asset List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Serial Number</th>
+                <!-- Add more columns as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for asset in assets %}
+            <tr>
+                <td>{{ asset.name }}</td>
+                <td>{{ asset.serial_number }}</td>
+                <!-- Add more columns as needed -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{% extends 'asset/base.html' %}
+{% block title %}Asset Disposal{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Asset Disposal</h1>
+    <form class="issue-asset-form" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Dispose Asset</button>
+    </form>
+</div>
+{% endblock %}

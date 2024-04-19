@@ -1,0 +1,12 @@
+{% extends 'asset/base.html' %}
+{% block title %} Add Employee {% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Add Employee</h1>
+    <form class="issue-asset-form" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}

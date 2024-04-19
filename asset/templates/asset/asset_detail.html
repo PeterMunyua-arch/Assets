@@ -1,0 +1,20 @@
+{% extends 'asset/base.html' %}
+
+{% block content %}
+<h1>Asset Detail</h1>
+
+    <h2>Asset Allocation Details:</h2>
+    <p>Asset Name: {{ asset_allocation.asset.name }}</p>
+    <p>Serial Number: {{ asset_allocation.serial_number }}</p>
+    <p>Assigned To: {{ asset_allocation.employee_allocated }}</p>
+    <p>Company: {{ asset_allocation.asset.company }}</p>
+    <p>Asset Status: {{ asset_allocation.asset_status }}</p>
+    <p>Assign Date: {{ asset_allocation.allocation_date }}</p>
+    <p>Return Date: {{ asset_allocation.return_date }}</p>
+
+
+
+    <h3>IT Manager's Signature:</h3>
+    <h3>Employee's Signature:</h3>
+    <!-- Add other asset fields as needed -->
+{% endblock %}

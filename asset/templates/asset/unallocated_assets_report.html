@@ -1,0 +1,33 @@
+{% extends 'asset/base.html' %}
+{% block title %} Unallocated Assets Report {% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Unallocated Assets Report</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Asset Name</th>
+                <th>Serial Number</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for asset_allocation in unallocated_assets %}
+                <tr>
+                    <td id="demo" onclick="myFunction()">{{ asset_allocation.name }}</td>
+                    <br>
+                    <td>{{ asset_allocation.serial_number }}</td>
+                    
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</div>
+<script>
+function myFunction() {
+    document.getElementById("demo").tyle.color = "red";
+}
+</script>
+
+{% endblock %}

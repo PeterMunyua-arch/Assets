@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Inventory Management System {% endblock %}</title>
+    <link rel="stylesheet" href="path/to/feather-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="{% static 'asset/style.css' %}">
+
+    <style>
+        .dropbtn {
+          background-color: #a4f5f5;
+          color: black;
+          padding: 16px;
+          font-size: 16px;
+          border: none;
+        }
+        
+        .dropdown {
+          position: relative;
+          display: inline-block;
+        }
+        
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          background-color: #f1f1f1;
+          min-width: 160px;
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+          z-index: 1;
+        }
+        
+        .dropdown-content a {
+          color: black;
+          padding: 12px 16px;
+          text-decoration: none;
+          display: block;
+        }
+        
+        .dropdown-content a:hover {background-color: #ddd;}
+        
+        .dropdown:hover .dropdown-content {display: block;}
+        
+        .dropdown:hover .dropbtn {background-color: #b5dcec;}
+
+        .logout-section {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    
+
+        </style>
+</head>
+<body>
+
+
+    <header>
+        <div>
+            <h1>IT Inventory</h1>
+            <div style="padding-left:1200px ;">
+
+                {% if user.is_authenticated %}
+    
+    <form action="{% url 'logout' %}" method="post">
+      {% csrf_token %}
+      </i><button type="submit"> <i class="fas fa-sign-out-alt"> </i>Log Out</button>
+      
+    </form>
+    {% else %}
+    <p>You are not logged in</p>
+    <a href="{% url 'login' %}">Log In</a>
+    {% endif %}
+            </div>
+        </div>
+        
+    </header>
+    <div class="sidebar">
+        <h2><i class="fa-solid fa-bars" onclick="redirectToHome()" ></i></h2>
+        <ul>
+
+            <li>
+                <div class="dropdown">
+                    <button class="dropbtn">Asset</button>
+                    <div class="dropdown-content">
+                        <a href="{% url 'asset_allocation_form' %}">Asset Allocation</a>
+                        <a href="{% url 'asset_return_form' %}">Asset Return</a>
+                        <a href="{% url 'asset_disposal' %}">Asset Disposal</a>
+                    </div>
+                  </div>
+             </li>
+    
+            <li><a href="{% url 'add_asset' %}">Add Asset</a></li>
+            <li><a href="{% url 'add_employee' %}">Add Employee</a></li>
+            <li><a href="{% url 'asset_report' %}">Asset Report</a></li>
+             
+        
+                
+          
+            
+            <!-- Link to issuance success page -->
+        </ul>
+    </div>
+
+    <div class="content">
+
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+        function redirectToHome() {
+            window.location.href = '{% url "home" %}';
+        }
+    </script>
+    
+
+
+</body>
+</html>
