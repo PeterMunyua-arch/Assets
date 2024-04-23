@@ -80,8 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'Assets',
-        'USER': 'Ltd_user',
-        'PASSWORD': 'Change@123',
+        'USER': '',
+        'PASSWORD': '',
         'HOST': 'PHSL-SAPB1',  # Or your MySQL host IP
         'PORT': '1433',
         'OPTIONS': {
