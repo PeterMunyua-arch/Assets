@@ -76,29 +76,22 @@ WSGI_APPLICATION = 'pits.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'mssql',
+        'NAME': 'Assets',
+        'USER': 'Ltd_user',
+        'PASSWORD': 'Change@123',
+        'HOST': 'PHSL-SAPB1',  # Or your MySQL host IP
+        'PORT': '1433',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+
+
+        },
+    },
 }
 
-#DATABASES = {
-    #'default': {
-       # 'ENGINE': 'mssql',
-      #  'NAME': 'Assets',
-       # 'USER': 'sa',
-      #  'PASSWORD': 'B1Admin@123',
-       # 'HOST': 'PHSL-SAPB1-1',  # Or your MySQL host IP
-      #  'PORT': '1433',
-       # 'OPTIONS': {
-           # 'driver': 'ODBC Driver 17 for SQL Server',
-
-
-       # }  # MySQL default port
-   # }
-#}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

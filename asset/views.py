@@ -90,16 +90,39 @@ def assign_asset(request):
 
 
 
+# @login_required
+#def add_asset(request):
+    #if request.method == 'POST':
+        #form = AddForm(request.POST)
+       # if form.is_valid():
+         #   form.save()  # Save the form data to the database
+            #return redirect('home')  # Redirect to success page
+   # else:
+      #  form = AddForm()
+   # return render(request, 'asset/add_asset.html', {'form': form})
+
+from django.shortcuts import render, redirect
+from .models import Asset, Company
+from .forms import AddTablet, AddMobile, AddDesktop, AddLaptop, AddServer, AddPrinter
+
+from django.shortcuts import render, redirect
+from .models import Asset
+
 @login_required
 def add_asset(request):
     if request.method == 'POST':
         form = AddForm(request.POST)
         if form.is_valid():
-            form.save()  # Save the form data to the database
-            return redirect('home')  # Redirect to success page
+            asset = form.save(commit=False)
+            asset.company = Company.objects.first()  # Example: Assign a company
+            asset.save()
+            return redirect('home')  # Redirect to asset list page or another page
     else:
         form = AddForm()
+
     return render(request, 'asset/add_asset.html', {'form': form})
+
+
 
 
 @login_required

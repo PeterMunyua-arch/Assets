@@ -13,7 +13,7 @@ class Company(models.Model):
 
 class Employee(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     department = models.CharField(max_length=100)
     email = models.EmailField()
@@ -24,10 +24,15 @@ class Employee(models.Model):
         return self.first_name
 
 
+
 class Asset(models.Model):
-    ASSET_TYPE_CHOICES = [
-        ('notebook', 'Notebook'),
+    ASSET_TYPE_CHOICES = ASSET_TYPE_CHOICES = [
+        ('laptop', 'Laptop'),
+        ('mobile', 'Mobile'),
         ('desktop', 'Desktop'),
+        ('server', 'Server'),
+        ('printer', 'Printer'),
+        ('tablet', 'Tablet'),
     ]
     OFFICE_TYPE_CHOICES = [
         ('2007', '2007'),
@@ -42,17 +47,19 @@ class Asset(models.Model):
         ('win10', 'Win10'),
         ('win11', 'Win11')
     ]
-    name = models.CharField(max_length=100, unique=True)
-    model = models.CharField(max_length=100)
-    type = models.CharField(max_length=50, choices=ASSET_TYPE_CHOICES, null=True)
-    office = models.CharField(max_length=50, choices=OFFICE_TYPE_CHOICES, null=True)
-    office_licence = models.CharField(max_length=50, null=True)
-    os = models.CharField(max_length=100, choices=OS_TYPE_CHOICES, null=True)
-    os_licence = models.CharField(max_length=100, null=True)
-    specs = models.TextField()
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    purchase_date = models.DateField()
-    serial_number = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=True)
+    model = models.CharField(max_length=100, blank=True)
+    type = models.CharField(max_length=50, choices=ASSET_TYPE_CHOICES,blank=True, null=True)
+    office = models.CharField(max_length=50, choices=OFFICE_TYPE_CHOICES, null=True, blank=True)
+    office_licence = models.CharField(max_length=50, null=True, blank=True)
+    os = models.CharField(max_length=100, choices=OS_TYPE_CHOICES, null=True, blank=True)
+    os_licence = models.CharField(max_length=100, null=True, blank=True)
+    specs = models.TextField(blank=True)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
+    purchase_date = models.DateField(blank=True)
+    serial_number = models.CharField(max_length=100, blank=True)
+    accessories = models.CharField(max_length=100, null=True, blank=True)
+    ip = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, null=True, blank=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     is_allocated = models.BooleanField(default=False)
     is_returned = models.BooleanField(default=False)

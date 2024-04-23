@@ -28,8 +28,34 @@ from .models import InventoryItem, Asset, Employee, Company, Transaction, AssetA
 class AddForm(forms.ModelForm):
     class Meta:
         model = Asset
-        fields = ['name', 'model', 'type', 'office', 'office_licence', 'os', 'os_licence', 'specs', 'purchase_price', 'purchase_date', 'serial_number', 'company']
+        fields = ['name', 'model', 'type', 'office', 'office_licence', 'os', 'os_licence', 'specs', 'purchase_price', 'purchase_date', 'serial_number', 'accessories', 'ip', 'company']
 
+
+class AddTablet(AddForm):
+    tablet_specific_field = forms.CharField(max_length=50)
+
+class AddMobile(AddForm):
+    mobile_specific_field = forms.CharField(max_length=50)
+
+class AddDesktop(AddForm):
+    office = forms.CharField(max_length=50)
+    office_licence = forms.CharField(max_length=50)
+    os = forms.CharField(max_length=100)
+    os_licence = forms.CharField(max_length=100)
+
+class AddLaptop(AddForm):
+    office = forms.CharField(max_length=50)
+    office_licence = forms.CharField(max_length=50)
+    os = forms.CharField(max_length=100)
+    os_licence = forms.CharField(max_length=100)
+
+class AddServer(AddForm):
+    server_specific_field = forms.CharField(max_length=50)
+
+class AddPrinter(AddForm):
+    printer_specific_field = forms.CharField(max_length=50)
+
+    
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
@@ -79,3 +105,4 @@ class CustomUserCreationForm(UserCreationForm):
         super(UserCreationForm,self).__init__(*args, **kwargs)
         for name,field in self.fields.items():
             field.widget.attrs.update({'class':'input'})
+

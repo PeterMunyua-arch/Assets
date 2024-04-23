@@ -10,3 +10,4 @@ admin.site.register(Transaction)
 admin.site.register(AssetAllocation)
 admin.site.register(AssetReturn)
 admin.site.register(Disposal)
+

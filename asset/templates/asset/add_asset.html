@@ -1,10 +1,10 @@
-
 {% extends 'asset/base.html' %}
 {% block title %} Add Asset {% endblock %}
 {% block content %}
 <div class="container">
-    <h1>Add Asset</h1>
-    <form class="issue-asset-form" method="post" action="{% url 'add_asset' %}">
+    <form class="issue-asset-form" method="POST">
+
+    <form class="issue-asset-form" method="POST">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Submit</button>
