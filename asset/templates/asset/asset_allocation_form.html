@@ -14,6 +14,13 @@
             <form class="asset-form" method="POST" novalidate>
                 {% csrf_token %}
                 
+                {% if form.errors %}
+                <div class="alert alert-danger mb-4">
+                    <strong>Error!</strong> Please correct the errors below.
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+                
                 <div class="form-grid">
                     {% for field in form %}
                     <div class="form-group {% if field.errors %}has-error{% endif %}">
@@ -24,8 +31,15 @@
                             {% endif %}
                         </label>
                         
-                        {% if field.name == 'asset' or field.name == 'employee_allocated' or field.name == 'employee_returning' %}
+                        {% if field.name in 'asset,employee_allocated,employee_returning,asset_status' %}
                             {{ field }}
+                        {% elif field.name in 'allocation_date,return_date' %}
+                            <input type="date" 
+                                   class="form-control"
+                                   id="{{ field.id_for_label }}"
+                                   name="{{ field.name }}"
+                                   value="{{ field.value|default_if_none:''|date:'Y-m-d' }}"
+                                   {% if field.field.required %}required{% endif %}>
                         {% else %}
                             <input type="{{ field.field.widget.input_type }}" 
                                    class="form-control"
@@ -92,7 +106,7 @@
         color: var(--dark);
     }
     
-    .form-control {
+    .form-control, select.form-control {
         width: 100%;
         padding: 0.75rem 1rem;
         font-size: 1rem;
@@ -105,7 +119,7 @@
         transition: var(--transition);
     }
     
-    .form-control:focus {
+    .form-control:focus, select.form-control:focus {
         border-color: var(--primary);
         outline: 0;
         box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
@@ -135,8 +149,7 @@
     }
     
     /* Date picker field styling */
-    input[type="date"].form-control,
-    input[type="datetime-local"].form-control {
+    input[type="date"].form-control {
         padding: 0.65rem 1rem;
     }
     
@@ -178,21 +191,6 @@
         box-shadow: var(--box-shadow) !important;
     }
     
-    /* Conditional field styling */
-    .conditional-field {
-        display: none;
-        animation: fadeIn 0.3s ease;
-    }
-    
-    .conditional-field.show {
-        display: block;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .form-actions {
@@ -204,12 +202,10 @@
         }
     }
 </style>
-{% endblock %}
 
-{% block scripts %}
 <script>
     $(document).ready(function() {
-        // Initialize Select2 with enhanced options
+        // Initialize Select2 for all select fields
         $('select').select2({
             width: '100%',
             theme: 'bootstrap4',
@@ -217,39 +213,14 @@
             allowClear: true
         });
         
-        // Add custom styling to Select2 when focused
-        $(document).on('focus', '.select2-selection', function() {
-            $(this).closest('.select2-container').addClass('select2-container--focus');
-        });
-        
-        // Remove custom styling when focus is lost
-        $(document).on('blur', '.select2-selection', function() {
-            $(this).closest('.select2-container').removeClass('select2-container--focus');
-        });
-        
-        // Show/hide conditional fields based on selections
-        function toggleConditionalFields() {
-            // Example conditional logic - customize based on your form needs
-            const assetValue = $('#id_asset').val();
-            if (assetValue && assetValue.includes('Laptop')) {
-                $('.conditional-field').addClass('show');
-            } else {
-                $('.conditional-field').removeClass('show');
-            }
-        }
-        
-        // Initialize conditional fields
-        toggleConditionalFields();
-        
-        // Update on change
-        $('#id_asset').on('change', toggleConditionalFields);
-        
-        // Date picker initialization (if needed)
-        $('input[type="date"], input[type="datetime-local"]').each(function() {
+        // Set today's date as default for date fields if empty
+        $('input[type="date"]').each(function() {
             if (!this.value) {
                 this.value = new Date().toISOString().slice(0, 10);
             }
         });
+        
+        // Conditional logic can be added here if needed
     });
 </script>
 {% endblock %}

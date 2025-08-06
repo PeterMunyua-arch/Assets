@@ -2,177 +2,407 @@
 {% block title %} Add Employee {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <i class="fas fa-user-plus text-primary mr-2"></i>
-                Add New Employee
-            </h2>
+<div class="employee-form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <div class="header-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1>Add New Employee</h1>
+            <p class="subtitle">Register a new employee in the system</p>
         </div>
-        <div class="card-body">
-            <form class="employee-form" method="POST" novalidate>
-                {% csrf_token %}
-                
-                <div class="form-grid">
-                    {% for field in form %}
-                    <div class="form-group {% if field.errors %}has-error{% endif %}">
-                        <label for="{{ field.id_for_label }}" class="form-label">
-                            {{ field.label }}
-                            {% if field.field.required %}
-                            <span class="text-danger">*</span>
-                            {% endif %}
-                        </label>
+
+        <form class="employee-form" method="POST">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <h4>Form Errors</h4>
+                    <p>Please correct the errors below</p>
+                    {{ form.errors }}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="form-columns">
+                <!-- Left Column - Personal Information -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Personal Information
+                        </h3>
                         
-                        {% if field.name == 'department' or field.name == 'position' %}
-                            {{ field }}
-                        {% else %}
-                            <input type="{{ field.field.widget.input_type }}" 
-                                   class="form-control"
-                                   id="{{ field.id_for_label }}"
-                                   name="{{ field.name }}"
-                                   value="{{ field.value|default_if_none:'' }}"
-                                   {% if field.field.required %}required{% endif %}
-                                   {% if field.name == 'email' %}autocomplete="email"{% endif %}
-                                   {% if field.name == 'phone' %}inputmode="tel"{% endif %}>
-                        {% endif %}
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}">
+                                First Name
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                {{ form.first_name }}
+                            </div>
+                            {% for error in form.first_name.errors %}
+                            <div class="error-message">{{ error }}</div>
+                            {% endfor %}
+                        </div>
                         
-                        {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}">
+                                Last Name
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
                         
-                        {% for error in field.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}">
+                                Email
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-envelope"></i>
+                                {{ form.email }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.phone_number.id_for_label }}">
+                                Phone Number
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone"></i>
+                                {{ form.phone_number }}
+                            </div>
+                        </div>
                     </div>
-                    {% endfor %}
                 </div>
                 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-user-check mr-2"></i>
-                        Save Employee
-                    </button>
-                    <a href="{% url 'home' %}" class="btn btn-outline">
-                        <i class="fas fa-times mr-2"></i>
-                        Cancel
-                    </a>
+                <!-- Right Column - Employment Details -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-briefcase"></i>
+                            Employment Details
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.company.id_for_label }}">
+                                Company
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-building"></i>
+                                {{ form.company }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.department.id_for_label }}">
+                                Department
+                                <span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-users"></i>
+                                {{ form.department }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.employee_id.id_for_label }}">
+                                Employee ID
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-id-card"></i>
+                                {{ form.employee_id }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button type="reset" class="btn btn-outline">
+                    <i class="fas fa-undo"></i>
+                    Reset
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Employee
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 <style>
-    /* Form-specific styles */
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
+    :root {
+        --primary: #4361ee;
+        --primary-light: #eef2ff;
+        --primary-dark: #3730a3;
+        --secondary: #4f46e5;
+        --accent: #818cf8;
+        --light: #f8fafc;
+        --dark: #0f172a;
+        --dark-gray: #334155;
+        --gray: #64748b;
+        --light-gray: #e2e8f0;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --border-radius: 10px;
+        --border-radius-sm: 6px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+
+    .employee-form-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
     }
-    
-    .form-group {
-        margin-bottom: 1.25rem;
+
+    .form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+    }
+
+    .form-header {
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        text-align: center;
         position: relative;
     }
-    
-    .form-group.has-error .form-control {
-        border-color: var(--danger);
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
     }
-    
-    .form-label {
+
+    .subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+    }
+
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+
+    .form-columns {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 2rem;
+    }
+
+    .form-column {
+        flex: 1;
+        min-width: 300px;
+        padding: 0 1rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 500;
-        color: var(--dark);
+        color: var(--dark-gray);
+        font-size: 0.9rem;
     }
-    
-    .form-control {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        line-height: 1.5;
-        color: var(--dark);
-        background-color: white;
-        background-clip: padding-box;
-        border: 1px solid var(--light-gray);
-        border-radius: var(--border-radius);
-        transition: var(--transition);
+
+    .required {
+        color: var(--danger);
+        margin-left: 0.25rem;
     }
-    
-    .form-control:focus {
-        border-color: var(--primary);
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+
+    .input-with-icon {
+        position: relative;
     }
-    
-    .form-text {
-        display: block;
-        margin-top: 0.25rem;
-        font-size: 0.875rem;
+
+    .input-with-icon i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
         color: var(--gray);
     }
-    
-    .invalid-feedback {
+
+    .input-with-icon input,
+    .input-with-icon select {
         width: 100%;
-        margin-top: 0.25rem;
-        font-size: 0.875rem;
-        color: var(--danger);
+        padding-left: 2.5rem;
     }
-    
+
+    input, select {
+        height: 46px;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--light-gray);
+        border-radius: var(--border-radius-sm);
+        font-size: 0.95rem;
+        transition: var(--transition);
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .error-message {
+        font-size: 0.8rem;
+        color: var(--danger);
+        margin-top: 0.5rem;
+    }
+
     .form-actions {
         display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        padding-top: 1.5rem;
+        justify-content: space-between;
+        padding: 1.5rem 2rem;
         border-top: 1px solid var(--light-gray);
-        margin-top: 1.5rem;
     }
-    
-    /* Date picker field styling */
-    input[type="date"].form-control {
-        padding: 0.65rem 1rem;
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
-    
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: white;
+        color: var(--dark-gray);
+        border: 1px solid var(--light-gray);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--light);
+        border-color: var(--primary-light);
+        color: var(--primary);
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--light-gray);
+        color: var(--dark-gray);
+    }
+
+    .btn-outline:hover {
+        background-color: var(--light);
+    }
+
+    .alert-error {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border-radius: var(--border-radius-sm);
+        margin: 0 2rem 2rem;
+    }
+
+    .alert-error i {
+        font-size: 1.5rem;
+    }
+
+    .alert-error h4 {
+        margin-bottom: 0.25rem;
+    }
+
     /* Select2 customization */
     .select2-container--default .select2-selection--single {
-        height: 42px;
+        height: 46px;
         border: 1px solid var(--light-gray) !important;
-        border-radius: var(--border-radius) !important;
+        border-radius: var(--border-radius-sm) !important;
     }
-    
+
     .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 42px !important;
-        padding-left: 16px !important;
-        color: var(--dark) !important;
+        line-height: 46px !important;
+        padding-left: 2.5rem !important;
+        color: var(--dark-gray) !important;
     }
-    
+
     .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 40px !important;
+        height: 44px !important;
     }
-    
-    .select2-container--default .select2-results__option--highlighted[aria-selected] {
-        background-color: var(--primary) !important;
-    }
-    
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .form-actions {
+        .form-columns {
+            padding: 1.5rem;
             flex-direction: column;
         }
         
-        .form-actions .btn {
+        .form-column {
+            padding: 0;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            padding: 1.5rem;
+            flex-direction: column-reverse;
+            gap: 1rem;
+        }
+        
+        .btn {
             width: 100%;
+            justify-content: center;
         }
     }
 </style>
@@ -182,30 +412,40 @@
         // Initialize Select2 for dropdown fields
         $('select').select2({
             width: '100%',
-            theme: 'bootstrap4'
+            placeholder: 'Select an option',
+            allowClear: true
         });
         
-        // Add focus styling to Select2
-        $('.select2-container').on('click', function() {
-            $(this).find('.select2-selection').css({
-                'border-color': 'var(--primary)',
-                'box-shadow': '0 0 0 0.2rem rgba(67, 97, 238, 0.25)'
+        // Phone number formatting
+        $('#id_phone_number').on('input', function() {
+            this.value = this.value.replace(/[^0-9+]/g, '');
+        });
+        
+        // Form validation
+        $('.employee-form').submit(function(e) {
+            let isValid = true;
+            
+            // Check required fields
+            $('[required]').each(function() {
+                if (!$(this).val()) {
+                    $(this).addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
             });
-        });
-        
-        // Remove focus styling when clicking elsewhere
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.select2-container').length) {
-                $('.select2-selection').css({
-                    'border-color': 'var(--light-gray)',
-                    'box-shadow': 'none'
-                });
+            
+            // Validate email format
+            const email = $('#id_email').val();
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                $('#id_email').addClass('is-invalid');
+                isValid = false;
             }
-        });
-        
-        // Format phone number input
-        $('#id_phone').on('input', function() {
-            $(this).val($(this).val().replace(/[^0-9+]/g, ''));
+            
+            if (!isValid) {
+                e.preventDefault();
+                $('.alert-error').show();
+            }
         });
     });
 </script>
