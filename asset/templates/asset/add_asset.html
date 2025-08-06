@@ -2,157 +2,425 @@
 {% block title %} Add Asset {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <i class="fas fa-plus-circle text-primary mr-2"></i>
-                Add New Asset
-            </h2>
+<div class="asset-form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <div class="header-icon">
+                <i class="fas fa-laptop"></i>
+            </div>
+            <h1>Add New Asset</h1>
+            <p class="subtitle">Register a new asset in the inventory system</p>
         </div>
-        <div class="card-body">
-            <form class="asset-form" method="POST">
-                {% csrf_token %}
-                
-                {% if form.errors %}
-                <div class="alert alert-danger">
-                    <strong>Error!</strong> Please correct the errors below.
+
+        <form class="asset-form" method="POST">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <h4>Form Errors</h4>
+                    <p>Please correct the errors below</p>
                     {{ form.errors }}
                 </div>
-                {% endif %}
-                
-                <div class="form-grid">
-                    {% for field in form %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}" class="form-label">
-                            {{ field.label }}
-                            {% if field.field.required %}
-                            <span class="text-danger">*</span>
+            </div>
+            {% endif %}
+            
+            <div class="form-columns">
+                <!-- Left Column -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Basic Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}">
+                                {{ form.name.label }}
+                                {% if form.name.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.help_text %}
+                            <div class="help-text">{{ form.name.help_text }}</div>
                             {% endif %}
-                        </label>
+                        </div>
                         
-                        {% if field.name in 'type,office,os,company' %}
-                            {{ field }}
-                        {% elif field.name == 'purchase_date' %}
-                            <input type="date" 
-                                   class="form-control"
-                                   id="{{ field.id_for_label }}"
-                                   name="{{ field.name }}"
-                                   value="{{ field.value|default_if_none:''|date:'Y-m-d' }}"
-                                   {% if field.field.required %}required{% endif %}>
-                        {% else %}
-                            <input type="{{ field.field.widget.input_type }}" 
-                                   class="form-control"
-                                   id="{{ field.id_for_label }}"
-                                   name="{{ field.name }}"
-                                   value="{{ field.value|default_if_none:'' }}"
-                                   {% if field.field.required %}required{% endif %}>
-                        {% endif %}
+                        <div class="form-group">
+                            <label for="{{ form.model.id_for_label }}">
+                                {{ form.model.label }}
+                                {% if form.model.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            {{ form.model }}
+                        </div>
                         
-                        {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
+                        <div class="form-group">
+                            <label for="{{ form.type.id_for_label }}">
+                                {{ form.type.label }}
+                                {% if form.type.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            {{ form.type }}
+                        </div>
                         
-                        {% for error in field.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
+                        <div class="form-group">
+                            <label for="{{ form.serial_number.id_for_label }}">
+                                {{ form.serial_number.label }}
+                                {% if form.serial_number.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            {{ form.serial_number }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.company.id_for_label }}">
+                                {{ form.company.label }}
+                                {% if form.company.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            {{ form.company }}
+                        </div>
                     </div>
-                    {% endfor %}
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-receipt"></i>
+                            Purchase Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.purchase_price.id_for_label }}">
+                                {{ form.purchase_price.label }}
+                                {% if form.purchase_price.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            <div class="input-with-icon">
+                                <span class="currency">Ksh</span>
+                                {{ form.purchase_price }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.purchase_date.id_for_label }}">
+                                {{ form.purchase_date.label }}
+                                {% if form.purchase_date.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            {{ form.purchase_date }}
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save mr-2"></i>
-                        Save Asset
-                    </button>
-                    <a href="{% url 'home' %}" class="btn btn-outline">
-                        <i class="fas fa-times mr-2"></i>
-                        Cancel
-                    </a>
+                <!-- Right Column -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-code"></i>
+                            Software Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.os.id_for_label }}">{{ form.os.label }}</label>
+                            {{ form.os }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.os_licence.id_for_label }}">{{ form.os_licence.label }}</label>
+                            {{ form.os_licence }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.office.id_for_label }}">{{ form.office.label }}</label>
+                            {{ form.office }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.office_licence.id_for_label }}">{{ form.office_licence.label }}</label>
+                            {{ form.office_licence }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-cogs"></i>
+                            Additional Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.specs.id_for_label }}">{{ form.specs.label }}</label>
+                            {{ form.specs }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.accessories.id_for_label }}">{{ form.accessories.label }}</label>
+                            {{ form.accessories }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.ip.id_for_label }}">{{ form.ip.label }}</label>
+                            {{ form.ip }}
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Asset
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
 <style>
-    /* Form-specific styles */
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
+    :root {
+        --primary: #4361ee;
+        --primary-light: #eef2ff;
+        --primary-dark: #3730a3;
+        --secondary: #4f46e5;
+        --accent: #818cf8;
+        --light: #f8fafc;
+        --dark: #0f172a;
+        --dark-gray: #334155;
+        --gray: #64748b;
+        --light-gray: #e2e8f0;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --border-radius: 10px;
+        --border-radius-sm: 6px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
+
+    .asset-form-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+    }
+
+    .form-header {
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        text-align: center;
+        position: relative;
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+    }
+
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+
+    .form-columns {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 2rem;
+    }
+
+    .form-column {
+        flex: 1;
+        min-width: 300px;
+        padding: 0 1rem;
+    }
+
+    .form-section {
         margin-bottom: 2rem;
     }
-    
-    .form-group {
-        margin-bottom: 1rem;
+
+    .section-title {
+        font-size: 1.1rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
     }
-    
-    .form-label {
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 500;
-        color: var(--dark);
+        color: var(--dark-gray);
+        font-size: 0.9rem;
     }
-    
-    .form-control, select.form-control {
+
+    .required {
+        color: var(--danger);
+        margin-left: 0.25rem;
+    }
+
+    input, select, textarea {
         width: 100%;
         padding: 0.75rem 1rem;
-        font-size: 1rem;
-        line-height: 1.5;
-        color: var(--dark);
-        background-color: white;
-        background-clip: padding-box;
         border: 1px solid var(--light-gray);
-        border-radius: var(--border-radius);
+        border-radius: var(--border-radius-sm);
+        font-size: 0.95rem;
         transition: var(--transition);
     }
-    
-    .form-control:focus, select.form-control:focus {
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
         border-color: var(--primary);
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        box-shadow: 0 0 0 3px var(--primary-light);
     }
-    
-    .form-text {
-        display: block;
-        margin-top: 0.25rem;
-        font-size: 0.875rem;
+
+    textarea {
+        min-height: 120px;
+        resize: vertical;
     }
-    
-    .invalid-feedback {
-        width: 100%;
-        margin-top: 0.25rem;
-        font-size: 0.875rem;
-        color: var(--danger);
+
+    .input-with-icon {
+        position: relative;
     }
-    
+
+    .currency {
+        position: absolute;
+        left: 0.5 Ksh;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-weight: 500;
+    }
+
+    .input-with-icon input {
+        padding-left: 2.5rem;
+    }
+
+    .help-text {
+        font-size: 0.8rem;
+        color: var(--gray);
+        margin-top: 0.5rem;
+    }
+
     .form-actions {
         display: flex;
         justify-content: flex-end;
         gap: 1rem;
-        padding-top: 1.5rem;
+        padding: 1.5rem 2rem;
         border-top: 1px solid var(--light-gray);
-        margin-top: 1.5rem;
     }
-    
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: white;
+        color: var(--dark-gray);
+        border: 1px solid var(--light-gray);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--light);
+        border-color: var(--primary-light);
+        color: var(--primary);
+    }
+
+    .alert-error {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border-radius: var(--border-radius-sm);
+        margin: 0 2rem 2rem;
+    }
+
+    .alert-error i {
+        font-size: 1.5rem;
+    }
+
+    .alert-error h4 {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Select2 customization */
+    .select2-container--default .select2-selection--single {
+        height: 46px;
+        border: 1px solid var(--light-gray);
+        border-radius: var(--border-radius-sm);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 46px;
+        padding-left: 16px;
+        color: var(--dark-gray);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 44px;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .form-actions {
+        .form-columns {
+            padding: 1.5rem;
             flex-direction: column;
         }
         
-        .form-actions .btn {
-            width: 100%;
+        .form-column {
+            padding: 0;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            padding: 1.5rem;
+            justify-content: center;
         }
     }
 </style>
@@ -162,25 +430,16 @@
         // Initialize Select2 for dropdown fields
         $('select').select2({
             width: '100%',
-            theme: 'bootstrap4'
+            placeholder: 'Select an option',
+            allowClear: true
         });
         
-        // Add focus styling to Select2
-        $('.select2-container').on('click', function() {
-            $(this).find('.select2-selection').css({
-                'border-color': 'var(--primary)',
-                'box-shadow': '0 0 0 0.2rem rgba(67, 97, 238, 0.25)'
-            });
-        });
+        // Set max date for purchase date field
+        $('[type="date"]').attr('max', new Date().toISOString().split('T')[0]);
         
-        // Remove focus styling when clicking elsewhere
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.select2-container').length) {
-                $('.select2-selection').css({
-                    'border-color': 'var(--light-gray)',
-                    'box-shadow': 'none'
-                });
-            }
+        // Format price field
+        $('#id_purchase_price').on('input', function() {
+            this.value = this.value.replace(/[^0-9.]/g, '');
         });
     });
 </script>
