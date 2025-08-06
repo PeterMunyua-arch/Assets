@@ -1,20 +1,295 @@
 {% extends 'asset/base.html' %}
+{% block title %}Asset Details - {{ asset_allocation.asset.name }}{% endblock %}
 
 {% block content %}
-<h1>Asset Detail</h1>
+<div class="container">
+    <div class="card asset-detail-card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-laptop text-primary mr-2"></i>
+                Asset Details
+            </h2>
+            <div class="card-actions">
+                <a href="{% url 'asset_report' %}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Assets
+                </a>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-print mr-2"></i>
+                    Print Record
+                </button>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="asset-detail-grid">
+                <!-- Asset Information Section -->
+                <div class="detail-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle text-primary mr-2"></i>
+                        Asset Information
+                    </h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Asset Name:</span>
+                        <span class="detail-value">{{ asset_allocation.asset.name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Serial Number:</span>
+                        <span class="detail-value">{{ asset_allocation.asset.serial_number }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Company:</span>
+                        <span class="detail-value">{{ asset_allocation.asset.company }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="badge badge-{% if asset_allocation.asset_status == 'Allocated' %}allocated{% else %}available{% endif %}">
+                            {{ asset_allocation.asset_status }}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Allocation Details Section -->
+                <div class="detail-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user-check text-primary mr-2"></i>
+                        Allocation Details
+                    </h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Assigned To:</span>
+                        <div class="employee-detail">
+                            <div class="employee-avatar">
+                                {{ asset_allocation.employee_allocated.first_name|first }}{{ asset_allocation.employee_allocated.last_name|first }}
+                            </div>
+                            <div>
+                                <div class="employee-name">{{ asset_allocation.employee_allocated.get_full_name }}</div>
+                                <div class="employee-position">{{ asset_allocation.employee_allocated.position }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Assign Date:</span>
+                        <span class="detail-value">{{ asset_allocation.allocation_date|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Return Date:</span>
+                        <span class="detail-value">
+                            {% if asset_allocation.return_date %}
+                                {{ asset_allocation.return_date|date:"M d, Y" }}
+                            {% else %}
+                                <span class="text-muted">Not returned</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Signature Section -->
+                <div class="detail-section signature-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-signature text-primary mr-2"></i>
+                        Signatures
+                    </h3>
+                    <div class="signature-container">
+                        <div class="signature-item">
+                            <div class="signature-line"></div>
+                            <div class="signature-label">IT Manager's Signature</div>
+                        </div>
+                        <div class="signature-item">
+                            <div class="signature-line"></div>
+                            <div class="signature-label">Employee's Signature</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <h2>Asset Allocation Details:</h2>
-    <p>Asset Name: {{ asset_allocation.asset.name }}</p>
-    <p>Serial Number: {{ asset_allocation.serial_number }}</p>
-    <p>Assigned To: {{ asset_allocation.employee_allocated }}</p>
-    <p>Company: {{ asset_allocation.asset.company }}</p>
-    <p>Asset Status: {{ asset_allocation.asset_status }}</p>
-    <p>Assign Date: {{ asset_allocation.allocation_date }}</p>
-    <p>Return Date: {{ asset_allocation.return_date }}</p>
-
-
-
-    <h3>IT Manager's Signature:</h3>
-    <h3>Employee's Signature:</h3>
-    <!-- Add other asset fields as needed -->
+<style>
+    /* Asset Detail Specific Styles */
+    .asset-detail-card {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .asset-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .detail-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        align-items: center;
+    }
+    
+    .detail-item {
+        display: flex;
+        margin-bottom: 1rem;
+        align-items: flex-start;
+    }
+    
+    .detail-label {
+        font-weight: 500;
+        color: var(--dark);
+        min-width: 120px;
+        margin-right: 1rem;
+    }
+    
+    .detail-value {
+        flex: 1;
+        color: var(--dark);
+    }
+    
+    /* Employee Detail */
+    .employee-detail {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .employee-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+    
+    .employee-name {
+        font-weight: 500;
+    }
+    
+    .employee-position {
+        font-size: 0.85rem;
+        color: var(--gray);
+    }
+    
+    /* Badges */
+    .badge {
+        display: inline-block;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 50rem;
+    }
+    
+    .badge-allocated {
+        background-color: rgba(74, 201, 240, 0.1);
+        color: var(--success);
+    }
+    
+    .badge-available {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+    
+    /* Signature Section */
+    .signature-section {
+        grid-column: span 2;
+    }
+    
+    .signature-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+    
+    .signature-item {
+        text-align: center;
+    }
+    
+    .signature-line {
+        height: 1px;
+        background-color: var(--dark);
+        margin-bottom: 0.5rem;
+        position: relative;
+        padding-top: 60px;
+    }
+    
+    .signature-line:after {
+        content: "";
+        position: absolute;
+        top: 30px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: var(--dark);
+    }
+    
+    .signature-label {
+        font-size: 0.9rem;
+        color: var(--gray);
+    }
+    
+    /* Print Styles */
+    @media print {
+        .sidebar, .header, .card-actions {
+            display: none !important;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: none;
+        }
+        
+        .asset-detail-grid {
+            grid-template-columns: 1fr 1fr !important;
+        }
+        
+        .detail-section {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            page-break-inside: avoid;
+        }
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .asset-detail-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .signature-section {
+            grid-column: span 1;
+        }
+        
+        .signature-container {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .card-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .card-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
 {% endblock %}

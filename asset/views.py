@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import  Employee, Asset, Transaction, AssetAllocation, AssetReturn, Company, Disposal
+from .models import  Employee, Asset, Transaction, AssetAllocation, AssetReturn, Company, Damaged
 from .forms import AssignmentForm, ReturnForm, AddForm, EmployeeForm, AssetAllocationForm, AssetReturnForm, DisposalForm
 from django.utils import timezone
 from django.contrib import messages
@@ -116,7 +116,7 @@ def add_asset(request):
             asset = form.save(commit=False)
             asset.company = Company.objects.first()  # Example: Assign a company
             asset.save()
-            return redirect('home')  # Redirect to asset list page or another page
+            return redirect('add_asset')  # Redirect to asset list page or another page
     else:
         form = AddForm()
 
@@ -131,7 +131,7 @@ def add_employee(request):
         form = EmployeeForm(request.POST)
         if form.is_valid():
             form.save()  # Save the form data to the database
-            return redirect('home')  # Redirect to success page
+            return redirect('add_employee')  # Redirect to success page
     else:
         form = EmployeeForm()
     return render(request, 'asset/add_employee.html', {'form': form})
@@ -307,3 +307,46 @@ def signin(request):
 
 def profile(request): 
     return render(request, 'asset/profile.html')
+
+
+    # views.py
+# views.py
+
+# views.py
+# views.py
+
+# views.py
+# views.py
+
+from django.shortcuts import render
+from .models import Asset, Employee, AssetAllocation
+
+def search(request):
+    query = request.GET.get('q')
+
+    assets = Asset.objects.filter(
+        serial_number__icontains=query
+    ) | Asset.objects.filter(name__icontains=query)
+    
+    employees = Employee.objects.filter(
+        first_name__icontains=query
+    ) | Employee.objects.filter(last_name__icontains=query)
+    
+    allocations = AssetAllocation.objects.filter(
+        employee_allocated__first_name__icontains=query
+    ) | AssetAllocation.objects.filter(
+        employee_allocated__last_name__icontains=query
+    ) | AssetAllocation.objects.filter(
+        asset__serial_number__icontains=query
+    )
+
+    context = {
+        'assets': assets,
+        'employees': employees,
+        'allocations': allocations,
+        'query': query
+    }
+
+    return render(request, 'asset/search_results.html', context)
+
+

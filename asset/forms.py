@@ -1,5 +1,5 @@
 from django import forms
-from .models import InventoryItem, Asset, Employee, Company, Transaction, AssetAllocation, AssetReturn, Disposal
+from .models import InventoryItem, Asset, Employee, Company, Transaction, AssetAllocation, AssetReturn, Damaged
 
 
 
@@ -59,7 +59,7 @@ class AddPrinter(AddForm):
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
-        fields = ['company', 'first_name', 'last_name', 'department', 'email', 'phone_number', 'employee_id']
+        fields = ['company', 'first_name', 'last_name', 'department', 'email', 'phone_number']
 
 
 
@@ -78,19 +78,19 @@ class ReturnForm(forms.ModelForm):
 class AssetAllocationForm(forms.ModelForm):
     class Meta:
         model = AssetAllocation
-        fields = ['asset', 'serial_number','employee_allocated', 'allocation_date', 'return_date', 'asset_status']
+        fields = ['asset', 'employee_allocated', 'allocation_date', 'return_date', 'asset_status']
 
 class AssetReturnForm(forms.ModelForm):
     class Meta:
         model = AssetReturn
-        fields = ['asset', 'serial_number', 'employee_returning', 'return_date', 'asset_status']
+        fields = ['asset', 'employee_returning', 'return_date', 'asset_status']
 
 
 
 class DisposalForm(forms.ModelForm):
     class Meta:
-        model = Disposal
-        fields = ['asset', 'serial_number', 'disposal_reason', 'disposal_date']
+        model = Damaged
+        fields = ['asset', 'damage_reason', 'damage_date']
         
 
 from django.contrib.auth.forms import UserCreationForm
@@ -106,3 +106,9 @@ class CustomUserCreationForm(UserCreationForm):
         for name,field in self.fields.items():
             field.widget.attrs.update({'class':'input'})
 
+
+# forms.py
+from django import forms
+
+class SearchForm(forms.Form):
+    query = forms.CharField(label='Search', max_length=100)

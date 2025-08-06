@@ -17,13 +17,11 @@ class Employee(models.Model):
     last_name = models.CharField(max_length=50)
     department = models.CharField(max_length=100)
     email = models.EmailField()
-    phone_number = models.CharField(max_length=20)
-    employee_id = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=20, blank=True)
+    
 
     def __str__(self):
-        return self.first_name
-
-
+        return self.first_name +" "+ self.last_name
 
 class Asset(models.Model):
     ASSET_TYPE_CHOICES = ASSET_TYPE_CHOICES = [
@@ -33,6 +31,8 @@ class Asset(models.Model):
         ('server', 'Server'),
         ('printer', 'Printer'),
         ('tablet', 'Tablet'),
+        ('UPS', 'UPS'),
+        ('Switch', 'Switch')
     ]
     OFFICE_TYPE_CHOICES = [
         ('2007', '2007'),
@@ -57,7 +57,7 @@ class Asset(models.Model):
     specs = models.TextField(blank=True)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
     purchase_date = models.DateField(blank=True)
-    serial_number = models.CharField(max_length=100, blank=True)
+    serial_number = models.CharField(max_length=100)
     accessories = models.CharField(max_length=100, null=True, blank=True)
     ip = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, null=True, blank=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
@@ -65,7 +65,7 @@ class Asset(models.Model):
     is_returned = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.name
+        return self.serial_number
 
 class AssetAllocation(models.Model):
     ASSET_STATUS_CHOICES = [
@@ -75,14 +75,14 @@ class AssetAllocation(models.Model):
     ]
 
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-    serial_number = models.CharField(max_length=100)
+    # serial_number = models.CharField(max_length=100)
     employee_allocated = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allocation_date = models.DateField()
     return_date = models.DateField(null=True, blank=True) 
     asset_status = models.CharField(max_length=50, choices=ASSET_STATUS_CHOICES)
 
     def __str__(self):
-        return f"{self.asset.name} - {self.serial_number} - Allocated to {self.employee_allocated} on {self.allocation_date}"
+        return f"{self.asset.name} - {self.asset.serial_number} - Allocated to {self.employee_allocated} on {self.allocation_date}"
 
     def save(self, *args, **kwargs):
         if not self.pk:  # If this is a new allocation, mark the asset as allocated
@@ -110,13 +110,13 @@ class AssetReturn(models.Model):
     ]
 
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-    serial_number = models.CharField(max_length=100)
+    # serial_number = models.CharField(max_length=100)
     employee_returning = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True)  # Allow NULL values
     return_date = models.DateField()
     asset_status = models.CharField(max_length=50, choices=ASSET_STATUS_CHOICES)
 
     def __str__(self):
-        return f"{self.asset.name} - {self.serial_number} - Returned by {self.employee_returning} on {self.return_date}"
+        return f"{self.asset.name} - {self.asset.serial_number} - Returned by {self.employee_returning} on {self.return_date}"
 
     def save(self, *args, **kwargs):
         if not self.pk:  # If this is a new return, mark the asset as returned
@@ -179,11 +179,11 @@ class InventoryItem(models.Model):
         return False
 
 
-class Disposal(models.Model):
+class Damaged(models.Model):
     serial_number = models.IntegerField(unique=True)
     asset = models.ForeignKey('Asset', on_delete=models.CASCADE)
-    disposal_reason = models.CharField(max_length=255)
-    disposal_date = models.DateField()
+    damage_reason = models.CharField(max_length=255)
+    damage_date = models.DateField()
 
     def __str__(self):
         return f"{self.asset} - Disposed on {self.disposal_date}"

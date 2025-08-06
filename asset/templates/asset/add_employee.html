@@ -1,12 +1,212 @@
 {% extends 'asset/base.html' %}
 {% block title %} Add Employee {% endblock %}
+
 {% block content %}
 <div class="container">
-    <h1>Add Employee</h1>
-    <form class="issue-asset-form" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-user-plus text-primary mr-2"></i>
+                Add New Employee
+            </h2>
+        </div>
+        <div class="card-body">
+            <form class="employee-form" method="POST" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-grid">
+                    {% for field in form %}
+                    <div class="form-group {% if field.errors %}has-error{% endif %}">
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                            <span class="text-danger">*</span>
+                            {% endif %}
+                        </label>
+                        
+                        {% if field.name == 'department' or field.name == 'position' %}
+                            {{ field }}
+                        {% else %}
+                            <input type="{{ field.field.widget.input_type }}" 
+                                   class="form-control"
+                                   id="{{ field.id_for_label }}"
+                                   name="{{ field.name }}"
+                                   value="{{ field.value|default_if_none:'' }}"
+                                   {% if field.field.required %}required{% endif %}
+                                   {% if field.name == 'email' %}autocomplete="email"{% endif %}
+                                   {% if field.name == 'phone' %}inputmode="tel"{% endif %}>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-check mr-2"></i>
+                        Save Employee
+                    </button>
+                    <a href="{% url 'home' %}" class="btn btn-outline">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* Form-specific styles */
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+    
+    .form-group.has-error .form-control {
+        border-color: var(--danger);
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: var(--dark);
+        background-color: white;
+        background-clip: padding-box;
+        border: 1px solid var(--light-gray);
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+    }
+    
+    .form-text {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--gray);
+    }
+    
+    .invalid-feedback {
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--danger);
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--light-gray);
+        margin-top: 1.5rem;
+    }
+    
+    /* Date picker field styling */
+    input[type="date"].form-control {
+        padding: 0.65rem 1rem;
+    }
+    
+    /* Select2 customization */
+    .select2-container--default .select2-selection--single {
+        height: 42px;
+        border: 1px solid var(--light-gray) !important;
+        border-radius: var(--border-radius) !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 42px !important;
+        padding-left: 16px !important;
+        color: var(--dark) !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px !important;
+    }
+    
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--primary) !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 for dropdown fields
+        $('select').select2({
+            width: '100%',
+            theme: 'bootstrap4'
+        });
+        
+        // Add focus styling to Select2
+        $('.select2-container').on('click', function() {
+            $(this).find('.select2-selection').css({
+                'border-color': 'var(--primary)',
+                'box-shadow': '0 0 0 0.2rem rgba(67, 97, 238, 0.25)'
+            });
+        });
+        
+        // Remove focus styling when clicking elsewhere
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.select2-container').length) {
+                $('.select2-selection').css({
+                    'border-color': 'var(--light-gray)',
+                    'box-shadow': 'none'
+                });
+            }
+        });
+        
+        // Format phone number input
+        $('#id_phone').on('input', function() {
+            $(this).val($(this).val().replace(/[^0-9+]/g, ''));
+        });
+    });
+</script>
 {% endblock %}

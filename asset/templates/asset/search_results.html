@@ -1,0 +1,426 @@
+{% extends 'asset/base.html' %}
+{% block title %}Search Results for "{{ query }}"{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card search-results-card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-search text-primary mr-2"></i>
+                Search Results for "{{ query }}"
+            </h2>
+            <div class="search-meta">
+                {% if laptops or mobiles or desktops or employees or allocations %}
+                    <span class="badge badge-primary">{{ laptops|length|add:mobiles|length|add:desktops|length }} assets</span>
+                    <span class="badge badge-primary">{{ employees|length }} employees</span>
+                    <span class="badge badge-primary">{{ allocations|length }} allocations</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card-body">
+            {% if laptops or mobiles or desktops or employees or allocations %}
+                <!-- Assets Section -->
+                <div class="results-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-laptop text-primary mr-2"></i>
+                        Assets
+                    </h3>
+                    <div class="results-grid">
+                        {% for laptop in laptops %}
+                        <div class="result-card asset-card">
+                            <div class="asset-icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="asset-details">
+                                <h4>{{ laptop.name }}</h4>
+                                <p class="serial-number">{{ laptop.serial_number }}</p>
+                                <p class="asset-meta">
+                                    <span class="badge badge-status">{{ laptop.status }}</span>
+                                    <span class="asset-type">Laptop</span>
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% for mobile in mobiles %}
+                        <div class="result-card asset-card">
+                            <div class="asset-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="asset-details">
+                                <h4>{{ mobile.name }}</h4>
+                                <p class="serial-number">{{ mobile.serial_number }}</p>
+                                <p class="asset-meta">
+                                    <span class="badge badge-status">{{ mobile.status }}</span>
+                                    <span class="asset-type">Mobile</span>
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% for desktop in desktops %}
+                        <div class="result-card asset-card">
+                            <div class="asset-icon">
+                                <i class="fas fa-desktop"></i>
+                            </div>
+                            <div class="asset-details">
+                                <h4>{{ desktop.name }}</h4>
+                                <p class="serial-number">{{ desktop.serial_number }}</p>
+                                <p class="asset-meta">
+                                    <span class="badge badge-status">{{ desktop.status }}</span>
+                                    <span class="asset-type">Desktop</span>
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Employees Section -->
+                {% if employees %}
+                <div class="results-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-users text-primary mr-2"></i>
+                        Employees
+                    </h3>
+                    <div class="results-grid">
+                        {% for employee in employees %}
+                        <div class="result-card employee-card">
+                            <div class="employee-avatar">
+                                {{ employee.first_name|first }}{{ employee.last_name|first }}
+                            </div>
+                            <div class="employee-details">
+                                <h4>{{ employee.first_name }} {{ employee.last_name }}</h4>
+                                <p class="employee-meta">
+                                    <span>{{ employee.position }}</span>
+                                    <span>{{ employee.department }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Allocations Section -->
+                {% if allocations %}
+                <div class="results-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-exchange-alt text-primary mr-2"></i>
+                        Allocations
+                    </h3>
+                    <div class="allocations-table">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th>Employee</th>
+                                        <th>Allocation Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for allocation in allocations %}
+                                    <tr>
+                                        <td>
+                                            <div class="asset-info">
+                                                <i class="fas fa-{% if allocation.asset.category == 'Laptop' %}laptop{% elif allocation.asset.category == 'Mobile' %}mobile-alt{% else %}desktop{% endif %} mr-2"></i>
+                                                {{ allocation.asset.serial_number }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="employee-info">
+                                                <div class="employee-avatar-sm">
+                                                    {{ allocation.employee_allocated.first_name|first }}{{ allocation.employee_allocated.last_name|first }}
+                                                </div>
+                                                {{ allocation.employee_allocated.first_name }} {{ allocation.employee_allocated.last_name }}
+                                            </div>
+                                        </td>
+                                        <td>{{ allocation.allocation_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="badge badge-{% if allocation.asset_status == 'Allocated' %}allocated{% else %}returned{% endif %}">
+                                                {{ allocation.asset_status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h3>No results found for "{{ query }}"</h3>
+                    <p class="text-muted">Try different search terms or check your spelling</p>
+                    <a href="{% url 'search' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-search mr-2"></i>
+                        Search Again
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Search Results Specific Styles */
+    .search-results-card {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .search-meta {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+    
+    .results-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        align-items: center;
+    }
+    
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    /* Result Cards */
+    .result-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.25rem;
+        transition: var(--transition);
+    }
+    
+    .result-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Asset Cards */
+    .asset-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .asset-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    
+    .asset-details {
+        flex: 1;
+    }
+    
+    .asset-details h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.1rem;
+    }
+    
+    .serial-number {
+        color: var(--gray);
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .asset-meta {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin: 0;
+    }
+    
+    .asset-type {
+        font-size: 0.8rem;
+        color: var(--gray);
+        background-color: var(--light-gray);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+    
+    /* Employee Cards */
+    .employee-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .employee-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+    
+    .employee-details {
+        flex: 1;
+    }
+    
+    .employee-details h4 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.1rem;
+    }
+    
+    .employee-meta {
+        display: flex;
+        gap: 0.75rem;
+        color: var(--gray);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    /* Allocations Table */
+    .allocations-table {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table th {
+        background-color: var(--primary);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--light-gray);
+        vertical-align: middle;
+    }
+    
+    .table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .table tr:hover {
+        background-color: rgba(67, 97, 238, 0.03);
+    }
+    
+    .asset-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .employee-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .employee-avatar-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    /* Badges */
+    .badge {
+        display: inline-block;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 50rem;
+    }
+    
+    .badge-primary {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+    }
+    
+    .badge-status {
+        background-color: rgba(74, 201, 240, 0.1);
+        color: var(--success);
+    }
+    
+    .badge-allocated {
+        background-color: rgba(74, 201, 240, 0.1);
+        color: var(--success);
+    }
+    
+    .badge-returned {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 0;
+    }
+    
+    .empty-state i {
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state h3 {
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .results-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .table {
+            min-width: 600px;
+        }
+    }
+</style>
+{% endblock %}

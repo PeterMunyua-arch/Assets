@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-rb@q4*+yx($xyr2+cfa@nr@5%#_!!_8sg-@9$kzr-0zvw441^1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.10.10.23', '127.0.0.1']
 
 
 # Application definition
@@ -40,6 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'asset',
 ]
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,28 +77,35 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pits.wsgi.application'
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
 
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'Assets',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': 'PHSL-SAPB1',  # Or your MySQL host IP
-        'PORT': '1433',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
+#DATABASES = {
+ #   'default': {
+  #      'ENGINE': 'mssql', # 'sql_server.pyodbc', #'mssql',
+   #     'NAME': 'Assets',
+    #    'USER': 'Ltd_user',
+     #   'PASSWORD': 'Change@123',
+      #  'HOST': '10.10.10.15',  # Or your MySQL host IP
+       # 'PORT': '1433',
+        # 'OPTIONS': {
+         #   'driver': 'ODBC Driver 17 for SQL Server',
+          #   'trust_server_certificate': True,
+        #},
+    #},
+#}
 
-
-        },
-    },
-}
-
-
+#10.10.10.15
+#PHSL-SAPB1
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 

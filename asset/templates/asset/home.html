@@ -3,150 +3,372 @@
 
 {% block content %}
 <style>
-    /* Top Bar Styling */
-    .top-bar {
-        background-color: #333;
-        color: #fff;
-        padding: 10px;
-        display: flex;
-        justify-content: flex-end;
+    :root {
+        --primary: #4361ee;
+        --primary-light: #e6e9ff;
+        --secondary: #3f37c9;
+        --success: #4cc9f0;
+        --danger: #f72585;
+        --warning: #f8961e;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --transition: all 0.3s ease;
     }
 
-    .menu-icon {
-        cursor: pointer;
-        margin-right: 20px;
+    .dashboard-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
     }
 
-    /* Dashboard Styling */
-    .dashboard {
-        margin-top: 20px;
-    }
-
-    .metrics {
+    .dashboard-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 20px;
+        align-items: center;
+        margin-bottom: 2rem;
     }
 
-    .metric {
-        background-color: #f9f9f9;
-        padding: 10px;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        flex: 1;
-        margin-right: 10px;
+    .dashboard-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
-    .metric h3 {
-        margin-bottom: 5px;
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
     }
 
-    .metric p {
-        font-size: 24px;
-        font-weight: bold;
-        color: #007bff;
+    .metric-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.5rem;
+        transition: var(--transition);
     }
 
-    /* Quick Links Styling */
-    .quick-links {
-        margin-top: 20px;
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
 
-    .quick-links h2 {
-        margin-bottom: 10px;
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
     }
 
-    .quick-links ul {
-        list-style-type: none;
-        padding: 0;
+    .metric-title {
+        font-size: 1rem;
+        color: var(--gray);
+        font-weight: 500;
     }
 
-    .quick-links li {
-        margin-bottom: 10px;
+    .metric-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-light);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .quick-links a {
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0.5rem 0;
+    }
+
+    .metric-change {
+        font-size: 0.85rem;
+        color: var(--gray);
+    }
+
+    .positive {
+        color: var(--success);
+    }
+
+    .quick-actions {
+        margin-top: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.5rem;
+        transition: var(--transition);
+        text-align: center;
+        color: var(--dark);
         text-decoration: none;
-        color: #333;
-        display: block;
-        padding: 10px;
-        border-radius: 5px;
-        transition: background-color 0.3s;
     }
 
-    .quick-links a:hover {
-        background-color: #f4f4f4;
+    .action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        color: var(--primary);
     }
 
-    /* Logout Section Styling */
-    .logout-section {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
+    .action-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
     }
 
-    .logout-button {
-        background-color: #dc3545;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
+    .action-title {
+        font-weight: 500;
     }
 
-    .logout-button:hover {
-        background-color: #c82333;
+    /* Recent Activity Section */
+    .recent-activity {
+        margin-top: 3rem;
     }
 
-    /* Additional Styling */
-    /* You can add more custom styles here */
+    .activity-list {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+    }
 
+    .activity-item {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        align-items: center;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--light);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .activity-details {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        font-size: 0.85rem;
+        color: var(--gray);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .action-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
-<div class="container">
-    <!-- Top Bar with Menu Icon -->
-    <div class="top-bar">
-        <i class="fas fa-bars menu-icon" onclick="redirectToHome()"></i>
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-tachometer-alt"></i>
+            Dashboard Overview
+        </h1>
     </div>
 
-    <!-- Dashboard Metrics -->
-    <div class="dashboard">
-        <h1><i class="fa-solid fa-house"></i></h1>
-        <div class="metrics">
-            <div class="metric">
-                <h3>Total Assets</h3>
-                <p>{{ total_assets }}</p>
+    <!-- Metrics Section -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3 class="metric-title">Total Assets</h3>
+                <div class="metric-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
             </div>
-            <div class="metric">
-                <h3>Assigned Assets</h3>
-                <p>{{ assigned_assets }}</p>
+            <div class="metric-value">{{ total_assets }}</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> 12% from last month
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3 class="metric-title">Assigned Assets</h3>
+                <div class="metric-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+            </div>
+            <div class="metric-value">{{ assigned_assets }}</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> 8% from last month
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3 class="metric-title">Available Assets</h3>
+                <div class="metric-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+           
+            <div class="metric-change">
+                <i class="fas fa-equals"></i> Steady
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <h3 class="metric-title">Total Employees</h3>
+                <div class="metric-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="metric-value">{{ total_employees }}</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> 5% from last month
             </div>
         </div>
     </div>
 
-    <!-- Quick Links Section -->
-    <div class="quick-links">
-        <h2>Quick Links</h2>
-        <ul>
-            <li><a href="{% url 'add_asset' %}">Add Asset</a></li>
-            <li><a href="{% url 'add_employee' %}">Add Employee</a></li>
-            <li><a href="{% url 'asset_report' %}">Asset Report</a></li>
-        </ul>
+    <!-- Quick Actions Section -->
+    <div class="quick-actions">
+        <h2 class="section-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+        </h2>
+        <div class="action-grid">
+            <a href="{% url 'add_asset' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <h3 class="action-title">Add Asset</h3>
+            </a>
+
+            <a href="{% url 'add_employee' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3 class="action-title">Add Employee</h3>
+            </a>
+
+            <a href="{% url 'asset_report' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3 class="action-title">View Reports</h3>
+            </a>
+
+            <a href="{% url 'asset_allocation_form' %}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-hand-holding"></i>
+                </div>
+                <h3 class="action-title">Allocate Asset</h3>
+            </a>
+        </div>
     </div>
 
-    <!-- Logout Section -->
-    <div class="logout-section">
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="logout-button">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </form>
+    <!-- Recent Activity Section -->
+    <div class="recent-activity">
+        <h2 class="section-title">
+            <i class="fas fa-history"></i>
+            Recent Activity
+        </h2>
+        <div class="activity-list">
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <div class="activity-details">
+                    <div class="activity-title">MacBook Pro assigned to John Doe</div>
+                    <div class="activity-time">2 hours ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="activity-details">
+                    <div class="activity-title">New employee Jane Smith added</div>
+                    <div class="activity-time">5 hours ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <div class="activity-details">
+                    <div class="activity-title">iPad returned by Michael Brown</div>
+                    <div class="activity-time">Yesterday</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-print"></i>
+                </div>
+                <div class="activity-details">
+                    <div class="activity-title">Asset report generated</div>
+                    <div class="activity-time">2 days ago</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+    // Add any necessary JavaScript here
     function redirectToHome() {
         window.location.href = '{% url "home" %}';
     }

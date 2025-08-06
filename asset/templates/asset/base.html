@@ -5,122 +5,782 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} Inventory Management System {% endblock %}</title>
-    <link rel="stylesheet" href="path/to/feather-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <link rel="stylesheet" href="{% static 'asset/style.css' %}">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        .dropbtn {
-          background-color: #a4f5f5;
-          color: black;
-          padding: 16px;
-          font-size: 16px;
-          border: none;
+        :root {
+            --primary: #4361ee;
+            --primary-light: #eef2ff;
+            --primary-dark: #3730a3;
+            --secondary: #4f46e5;
+            --accent: #818cf8;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --dark-gray: #334155;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+            --border-radius: 10px;
+            --border-radius-sm: 6px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --box-shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        .dropdown {
-          position: relative;
-          display: inline-block;
-        }
-        
-        .dropdown-content {
-          display: none;
-          position: absolute;
-          background-color: #f1f1f1;
-          min-width: 160px;
-          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-          z-index: 1;
-        }
-        
-        .dropdown-content a {
-          color: black;
-          padding: 12px 16px;
-          text-decoration: none;
-          display: block;
-        }
-        
-        .dropdown-content a:hover {background-color: #ddd;}
-        
-        .dropdown:hover .dropdown-content {display: block;}
-        
-        .dropdown:hover .dropbtn {background-color: #b5dcec;}
 
-        .logout-section {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
 
-    
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
 
-        </style>
+        /* Header Styles */
+        .header {
+            height: var(--header-height);
+            background: white;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: var(--transition);
+            border: 2px solid var(--light-gray);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .logout-btn {
+            background-color: var(--light);
+            color: var(--danger);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            border: 1px solid var(--light-gray);
+        }
+
+        .logout-btn:hover {
+            background-color: var(--danger);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            margin-top: var(--header-height);
+            flex: 1;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            height: calc(100vh - var(--header-height));
+            position: fixed;
+            padding: 1.5rem 0;
+            border-right: 1px solid var(--light-gray);
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 900;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .menu-title {
+            color: var(--gray);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin: 1.5rem 0 0.75rem 1rem;
+        }
+
+        .menu-item {
+            margin-bottom: 6px;
+            position: relative;
+        }
+
+        .menu-link, .dropdown-btn {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--dark-gray);
+            text-decoration: none;
+            border-radius: var(--border-radius-sm);
+            transition: var(--transition);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .menu-link:hover, .dropdown-btn:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .menu-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            box-shadow: 2px 0 0 var(--primary) inset;
+        }
+
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-text {
+            flex: 1;
+        }
+
+        .dropdown-arrow {
+            transition: var(--transition);
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .dropdown-btn.active .dropdown-arrow {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        .submenu {
+            list-style: none;
+            padding-left: 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .submenu.show {
+            max-height: 500px;
+            padding: 0.5rem 0;
+        }
+
+        .submenu-item {
+            margin-bottom: 4px;
+        }
+
+        .submenu-link {
+            display: block;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: var(--border-radius-sm);
+            transition: var(--transition);
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .submenu-link:before {
+            content: "";
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            transition: var(--transition);
+        }
+
+        .submenu-link:hover, .submenu-link.active {
+            color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: translateX(4px);
+        }
+
+        .submenu-link:hover:before, .submenu-link.active:before {
+            background-color: var(--primary);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            transition: var(--transition);
+            background-color: #f8fafc;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title:after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .breadcrumb a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb .divider {
+            opacity: 0.6;
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 2rem;
+        }
+
+        .search-form {
+            display: flex;
+            max-width: 600px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .search-form:focus-within {
+            box-shadow: var(--box-shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.85rem 1.25rem;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+            background-color: white;
+        }
+
+        .search-input::placeholder {
+            color: var(--gray);
+            opacity: 0.7;
+        }
+
+        .search-btn {
+            padding: 0 1.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Card Container */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.75rem;
+            margin-bottom: 1.75rem;
+            transition: var(--transition);
+            border: 1px solid rgba(226, 232, 240, 0.7);
+        }
+
+        .card:hover {
+            box-shadow: var(--box-shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .card-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .card-link:hover {
+            color: var(--primary-dark);
+            gap: 8px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Select2 Customization */
+        .select2-container--default .select2-selection--single {
+            height: 46px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius-sm);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 46px;
+            padding-left: 16px;
+            color: var(--dark-gray);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--primary);
+        }
+
+        /* Utility Classes */
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .bg-primary {
+            background-color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.85rem 1.75rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-sm {
+            padding: 0.65rem 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--light-gray);
+            color: var(--dark-gray);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light);
+            border-color: var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4em 0.75em;
+            font-size: 0.75em;
+            font-weight: 600;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 50rem;
+        }
+
+        .badge-primary {
+            color: white;
+            background-color: var(--primary);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* Notification dot */
+        .notification-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        /* Floating action button */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 100;
+            font-size: 1.5rem;
+        }
+
+        .fab:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+    </style>
 </head>
 <body>
-
-
-    <header>
-        <div>
+    <!-- Header Section -->
+    <header class="header">
+        <a href="{% url 'home' %}" class="logo">
+            <i class="fas fa-boxes"></i>
             <h1>IT Inventory</h1>
-            <div style="padding-left:1200px ;">
-
-                {% if user.is_authenticated %}
-    
-    <form action="{% url 'logout' %}" method="post">
-      {% csrf_token %}
-      </i><button type="submit"> <i class="fas fa-sign-out-alt"> </i>Log Out</button>
-      
-    </form>
-    {% else %}
-    <p>You are not logged in</p>
-    <a href="{% url 'login' %}">Log In</a>
-    {% endif %}
+        </a>
+        
+        <div class="user-actions">
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <span class="user-name">Admin</span>
             </div>
+            {% if user.is_authenticated %}
+            <button class="logout-btn" onclick="document.getElementById('logout-form').submit()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                {% csrf_token %}
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline">Login</a>
+            {% endif %}
         </div>
-        
     </header>
-    <div class="sidebar">
-        <h2><i class="fa-solid fa-bars" onclick="redirectToHome()" ></i></h2>
-        <ul>
 
-            <li>
-                <div class="dropdown">
-                    <button class="dropbtn">Asset</button>
-                    <div class="dropdown-content">
-                        <a href="{% url 'asset_allocation_form' %}">Asset Allocation</a>
-                        <a href="{% url 'asset_return_form' %}">Asset Return</a>
-                        <a href="{% url 'asset_disposal' %}">Asset Disposal</a>
-                    </div>
-                  </div>
-             </li>
-    
-            <li><a href="{% url 'add_asset' %}">Add Asset</a></li>
-            <li><a href="{% url 'add_employee' %}">Add Employee</a></li>
-            <li><a href="{% url 'asset_report' %}">Asset Report</a></li>
-             
-        
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="menu-title">Main</li>
+                <li class="menu-item">
+                    <a href="{% url 'home' %}" class="menu-link active">
+                        <i class="menu-icon fas fa-tachometer-alt"></i>
+                        <span class="menu-text">Dashboard</span>
+                    </a>
+                </li>
                 
-          
-            
-            <!-- Link to issuance success page -->
-        </ul>
+                <li class="menu-title">Inventory</li>
+                <li class="menu-item">
+                    <div class="dropdown-btn active">
+                        <i class="menu-icon fas fa-laptop"></i>
+                        <span class="menu-text">Assets</span>
+                        <i class="dropdown-arrow fas fa-chevron-down"></i>
+                    </div>
+                    <ul class="submenu show">
+                        <li class="submenu-item">
+                            <a href="{% url 'asset_allocation_form' %}" class="submenu-link">Allocate Asset</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="{% url 'asset_return_form' %}" class="submenu-link">Return Asset</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="{% url 'asset_disposal' %}" class="submenu-link">Dispose Asset</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="{% url 'add_asset' %}" class="submenu-link">Add New Asset</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="menu-item">
+                    <a href="{% url 'add_employee' %}" class="menu-link">
+                        <i class="menu-icon fas fa-user-plus"></i>
+                        <span class="menu-text">Add Employee</span>
+                    </a>
+                </li>
+                
+                <li class="menu-item">
+                    <a href="{% url 'asset_report' %}" class="menu-link">
+                        <i class="menu-icon fas fa-chart-bar"></i>
+                        <span class="menu-text">Reports</span>
+                        <span class="badge badge-primary" style="margin-left: auto;">New</span>
+                    </a>
+                </li>
+
+                <li class="menu-title">Support</li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <i class="menu-icon fas fa-question-circle"></i>
+                        <span class="menu-text">Help Center</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <i class="menu-icon fas fa-cog"></i>
+                        <span class="menu-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-header">
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <div class="breadcrumb">
+                        <a href="{% url 'home' %}">Home</a>
+                        <span class="divider">/</span>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        <span>Quick Action</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-container animate-fade">
+                <form class="search-form" action="{% url 'search' %}" method="get">
+                    <input type="text" name="q" class="search-input" placeholder="Search assets, employees, serial numbers..." required>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="card animate-fade" style="animation-delay: 0.1s;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-bell"></i> Recent Activities</h2>
+                    <a href="#" class="card-link">
+                        View All
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% block content %}
+                <!-- Your content will be injected here -->
+                {% endblock %}
+            </div>
+        </main>
     </div>
 
-    <div class="content">
+    <!-- Floating Action Button -->
+    <div class="fab" title="Quick Action">
+        <i class="fas fa-plus"></i>
+    </div>
 
-
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
-
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        // Initialize Select2
+        $(document).ready(function() {
+            $('select').select2();
+            
+            // Dropdown functionality
+            $('.dropdown-btn').click(function() {
+                $(this).toggleClass('active');
+                $(this).next('.submenu').toggleClass('show');
+            });
+            
+            // Active menu item highlighting
+            $('.menu-link').click(function() {
+                $('.menu-link').removeClass('active');
+                $(this).addClass('active');
+            });
+            
+            $('.submenu-link').click(function() {
+                $('.submenu-link').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Floating action button click
+            $('.fab').click(function() {
+                // You can customize this action
+                $('.btn-primary').click();
+            });
+        });
+        
         function redirectToHome() {
             window.location.href = '{% url "home" %}';
         }
     </script>
-    
-
-
+    {% block javascript %}
+    {% endblock %}
 </body>
 </html>
