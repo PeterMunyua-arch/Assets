@@ -92,10 +92,10 @@ DATABASES = {
 #DATABASES = {
  #   'default': {
   #      'ENGINE': 'mssql', # 'sql_server.pyodbc', #'mssql',
-   #     'NAME': 'Assets',
-    #    'USER': 'Ltd_user',
-     #   'PASSWORD': 'Change@123',
-      #  'HOST': '10.10.10.15',  # Or your MySQL host IP
+   #     'NAME': '', # database name
+    #    'USER': '', #username
+     #   'PASSWORD': '', # password
+      #  'HOST': '10.10.10.110',  # Or your MySQL host IP
        # 'PORT': '1433',
         # 'OPTIONS': {
          #   'driver': 'ODBC Driver 17 for SQL Server',
