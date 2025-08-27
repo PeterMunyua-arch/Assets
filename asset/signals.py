@@ -11,8 +11,8 @@ def update_asset_allocation(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=AssetReturn)
-def update_asset_return(sender, instance, created, **kwargs):
-    if created:  # Only update if a new return is created
+def update_asset_on_return(sender, instance, created, **kwargs):
+    if created:
         instance.asset.is_allocated = False
         instance.asset.is_returned = True
         instance.asset.save()

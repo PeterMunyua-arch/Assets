@@ -1,0 +1,533 @@
+{% extends 'asset/base.html' %}
+{% block title %}Mass Upload{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient-primary text-white py-4">
+            <div class="d-flex align-items-center">
+                <div class="icon-container bg-white rounded-circle p-3 me-3">
+                    <i class="fas fa-upload text-primary fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="card-title mb-0">Mass Upload Data</h2>
+                    <p class="card-subtitle mb-0 opacity-75">Upload multiple assets, employees, or allocations at once</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body p-5">
+            <form method="POST" enctype="multipart/form-data" novalidate class="needs-validation">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                <div class="alert alert-danger mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1">Upload Error</h5>
+                            <p class="mb-0">Please correct the errors below and try again.</p>
+                        </div>
+                    </div>
+                    <hr>
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+                
+                <!-- Upload Type Selection -->
+                <div class="form-section mb-5">
+                    <h4 class="section-title mb-4">
+                        <i class="fas fa-cube me-2 text-primary"></i>
+                        Select Data Type
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="{{ form.upload_type.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.upload_type.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="fas fa-database text-primary"></i>
+                                    </span>
+                                    {{ form.upload_type }}
+                                </div>
+                                <small class="form-text text-muted mt-2">
+                                    Choose the type of data you want to upload to the system
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="form-section mb-5">
+                    <h4 class="section-title mb-4">
+                        <i class="fas fa-file-upload me-2 text-primary"></i>
+                        Upload File
+                    </h4>
+                    
+                    <div class="file-upload-card">
+                        <div class="file-drop-zone" id="fileDropZone">
+                            <div class="file-drop-content text-center py-5">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <h5 class="mb-2">Drag & Drop your file here</h5>
+                                <p class="text-muted mb-3">or click to browse your files</p>
+                                <div class="custom-file">
+                                    {{ form.file }}
+                                    <label class="btn btn-primary px-4" for="{{ form.file.id_for_label }}">
+                                        <i class="fas fa-search me-2"></i>Browse Files
+                                    </label>
+                                </div>
+                                <div class="file-info mt-3">
+                                    <small class="text-muted">{{ form.file.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Instructions -->
+                <div class="form-section">
+                    <h4 class="section-title mb-4">
+                        <i class="fas fa-graduation-cap me-2 text-primary"></i>
+                        Upload Instructions
+                    </h4>
+                    
+                    <div class="instructions-card">
+                        <div class="instructions-tabs mb-4">
+                            <div class="nav nav-pills" role="tablist">
+                                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#assetInstructions">
+                                    <i class="fas fa-laptop me-2"></i>Assets
+                                </button>
+                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#employeeInstructions">
+                                    <i class="fas fa-users me-2"></i>Employees
+                                </button>
+                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#allocationInstructions">
+                                    <i class="fas fa-exchange-alt me-2"></i>Allocations
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content">
+                            <!-- Asset Instructions -->
+                            <div class="tab-pane fade show active" id="assetInstructions">
+                                <div class="instruction-content">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Required Columns
+                                    </h6>
+                                    <div class="required-columns mb-4">
+                                        <span class="badge bg-danger me-2 mb-2">serial_number</span>
+                                        <span class="badge bg-danger me-2 mb-2">name</span>
+                                    </div>
+                                    
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-list-alt me-2"></i>
+                                        Optional Columns
+                                    </h6>
+                                    <div class="optional-columns">
+                                        <span class="badge bg-secondary me-2 mb-2">model</span>
+                                        <span class="badge bg-secondary me-2 mb-2">type</span>
+                                        <span class="badge bg-secondary me-2 mb-2">company</span>
+                                        <span class="badge bg-secondary me-2 mb-2">purchase_date</span>
+                                        <span class="badge bg-secondary me-2 mb-2">purchase_price</span>
+                                        <span class="badge bg-secondary me-2 mb-2">imei_number</span>
+                                        <span class="badge bg-secondary me-2 mb-2">processor</span>
+                                        <span class="badge bg-secondary me-2 mb-2">ram</span>
+                                        <span class="badge bg-secondary me-2 mb-2">ssd_capacity</span>
+                                        <span class="badge bg-secondary me-2 mb-2">hdd_capacity</span>
+                                        <span class="badge bg-secondary me-2 mb-2">os</span>
+                                        <span class="badge bg-secondary me-2 mb-2">os_licence</span>
+                                        <span class="badge bg-secondary me-2 mb-2">office</span>
+                                        <span class="badge bg-secondary me-2 mb-2">office_licence</span>
+                                        <span class="badge bg-secondary me-2 mb-2">specs</span>
+                                        <span class="badge bg-secondary me-2 mb-2">accessories</span>
+                                        <span class="badge bg-secondary me-2 mb-2">ip</span>
+                                        <span class="badge bg-secondary me-2 mb-2">applications_description</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Employee Instructions -->
+                            <div class="tab-pane fade" id="employeeInstructions">
+                                <div class="instruction-content">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Required Columns
+                                    </h6>
+                                    <div class="required-columns mb-4">
+                                        <span class="badge bg-danger me-2 mb-2">first_name</span>
+                                        <span class="badge bg-danger me-2 mb-2">last_name</span>
+                                        <span class="badge bg-danger me-2 mb-2">email</span>
+                                        <span class="badge bg-danger me-2 mb-2">company</span>
+                                    </div>
+                                    
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-list-alt me-2"></i>
+                                        Optional Columns
+                                    </h6>
+                                    <div class="optional-columns">
+                                        <span class="badge bg-secondary me-2 mb-2">department</span>
+                                        <span class="badge bg-secondary me-2 mb-2">phone_number</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Allocation Instructions -->
+                            <div class="tab-pane fade" id="allocationInstructions">
+                                <div class="instruction-content">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Required Columns
+                                    </h6>
+                                    <div class="required-columns mb-4">
+                                        <span class="badge bg-danger me-2 mb-2">asset_serial_number</span>
+                                        <span class="badge bg-danger me-2 mb-2">employee_email</span>
+                                        <span class="badge bg-danger me-2 mb-2">allocation_date</span>
+                                    </div>
+                                    
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-list-alt me-2"></i>
+                                        Optional Columns
+                                    </h6>
+                                    <div class="optional-columns">
+                                        <span class="badge bg-secondary me-2 mb-2">return_date</span>
+                                        <span class="badge bg-secondary me-2 mb-2">asset_status</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="general-instructions mt-4 pt-4 border-top">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                General Guidelines
+                            </h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Supported formats: CSV, Excel (.xlsx, .xls)
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Maximum file size: 10MB
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Column names should match the field names exactly
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Dates should be in YYYY-MM-DD or MM/DD/YYYY format
+                                </li>
+                                <li>
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    Company can be specified by name or ID
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="template-downloads mt-4 pt-4 border-top">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-download me-2"></i>
+                                Download Templates
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'download_template' 'asset' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-file-excel me-2"></i>Asset Template
+                                </a>
+                                <a href="{% url 'download_template' 'employee' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-file-excel me-2"></i>Employee Template
+                                </a>
+                                <a href="{% url 'download_template' 'allocation' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-file-excel me-2"></i>Allocation Template
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="form-actions mt-5 pt-4 border-top">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="fas fa-upload me-2"></i>
+                            Upload File
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg px-5">
+                            <i class="fas fa-times me-2"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-light: #e8edff;
+        --primary-dark: #3730a3;
+        --secondary: #4f46e5;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s ease;
+    }
+
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .card-header.bg-gradient-primary {
+        background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+    }
+
+    .icon-container {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-section {
+        padding: 2rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid var(--light-gray);
+    }
+
+    .section-title {
+        color: var(--dark);
+        font-weight: 600;
+        border-bottom: 2px solid var(--primary-light);
+        padding-bottom: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.75rem;
+    }
+
+    .input-group-text {
+        background-color: var(--primary-light);
+        border-color: var(--light-gray);
+    }
+
+    select.form-control {
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--light-gray);
+        transition: var(--transition);
+    }
+
+    select.form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+    }
+
+    .file-upload-card {
+        border: 2px dashed var(--light-gray);
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        background: var(--light);
+    }
+
+    .file-upload-card:hover {
+        border-color: var(--primary);
+        background: var(--primary-light);
+    }
+
+    .file-drop-zone {
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .file-drop-content {
+        max-width: 400px;
+    }
+
+    #id_file {
+        display: none;
+    }
+
+    .instructions-card {
+        background: var(--light);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--light-gray);
+    }
+
+    .nav-pills .nav-link {
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1.5rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid var(--light-gray);
+        background: white;
+        color: var(--dark);
+        transition: var(--transition);
+    }
+
+    .nav-pills .nav-link.active,
+    .nav-pills .nav-link:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .tab-content {
+        padding: 1.5rem 0;
+    }
+
+    .badge {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    }
+
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, #a8a8a8, #8a8a8a);
+    }
+
+    .list-unstyled li {
+        padding: 0.5rem 0;
+    }
+
+    .btn {
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .form-actions {
+        background: var(--light);
+        margin: 0 -2rem -2rem;
+        padding: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .form-actions .d-flex {
+            flex-direction: column;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-pills .nav-link {
+            width: 100%;
+            margin-right: 0;
+            text-align: center;
+        }
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // File drop zone functionality
+        const fileDropZone = $('#fileDropZone');
+        const fileInput = $('#id_file');
+        
+        fileDropZone.on('click', function() {
+            fileInput.click();
+        });
+        
+        fileDropZone.on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).addClass('dragover');
+        });
+        
+        fileDropZone.on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('dragover');
+        });
+        
+        fileDropZone.on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('dragover');
+            
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.prop('files', files);
+                updateFileName(files[0].name);
+            }
+        });
+        
+        fileInput.change(function() {
+            if (this.files.length > 0) {
+                updateFileName(this.files[0].name);
+            }
+        });
+        
+        function updateFileName(fileName) {
+            $('.file-drop-content h5').html('File Selected');
+            $('.file-drop-content p').html(fileName);
+            $('.file-drop-content i').removeClass('fa-cloud-upload-alt').addClass('fa-check-circle text-success');
+        }
+        
+        // Bootstrap tab functionality
+        $('.nav-pills button').click(function() {
+            $('.nav-pills button').removeClass('active');
+            $(this).addClass('active');
+        });
+    });
+</script>
+{% endblock %}

@@ -71,11 +71,68 @@
                         </div>
                         
                         <div class="form-group">
+                            <label for="{{ form.imei_number.id_for_label }}">
+                                {{ form.imei_number.label }}
+                            </label>
+                            {{ form.imei_number }}
+                            <div class="help-text">For mobile devices and tablets only</div>
+                        </div>
+                        
+                        <div class="form-group">
                             <label for="{{ form.company.id_for_label }}">
                                 {{ form.company.label }}
                                 {% if form.company.field.required %}<span class="required">*</span>{% endif %}
                             </label>
                             {{ form.company }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-microchip"></i>
+                            Hardware Specifications
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.processor.id_for_label }}">
+                                {{ form.processor.label }}
+                            </label>
+                            {{ form.processor }}
+                        </div>
+                        
+                        
+                        <div class="form-group">
+                            <label for="{{ form.ram.id_for_label }}">
+                                {{ form.ram.label }}
+                            </label>
+                            {{ form.ram }}
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Middle Column -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-database"></i>
+                            Storage Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.ssd_capacity.id_for_label }}">
+                                {{ form.ssd_capacity.label }}
+                            </label>
+                            {{ form.ssd_capacity }}
+                            <div class="help-text">For devices with SSD storage</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.hdd_capacity.id_for_label }}">
+                                {{ form.hdd_capacity.label }}
+                            </label>
+                            {{ form.hdd_capacity }}
+                            <div class="help-text">For devices with HDD storage</div>
                         </div>
                     </div>
                     
@@ -195,7 +252,7 @@
     }
 
     .asset-form-container {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 2rem auto;
         padding: 0 1rem;
     }
@@ -241,12 +298,12 @@
         display: flex;
         flex-wrap: wrap;
         padding: 2rem;
+        gap: 1.5rem;
     }
 
     .form-column {
         flex: 1;
         min-width: 300px;
-        padding: 0 1rem;
     }
 
     .form-section {
@@ -307,11 +364,12 @@
 
     .currency {
         position: absolute;
-        left: 0.5 Ksh;
+        left: 0.75rem;
         top: 50%;
         transform: translateY(-50%);
         color: var(--gray);
         font-weight: 500;
+        z-index: 1;
     }
 
     .input-with-icon input {
@@ -404,14 +462,15 @@
     }
 
     /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .form-columns {
+            flex-direction: column;
+        }
+    }
+    
     @media (max-width: 768px) {
         .form-columns {
             padding: 1.5rem;
-            flex-direction: column;
-        }
-        
-        .form-column {
-            padding: 0;
         }
         
         .form-header {
@@ -421,6 +480,7 @@
         .form-actions {
             padding: 1.5rem;
             justify-content: center;
+            flex-wrap: wrap;
         }
     }
 </style>
@@ -441,6 +501,56 @@
         $('#id_purchase_price').on('input', function() {
             this.value = this.value.replace(/[^0-9.]/g, '');
         });
+        
+        // Show/hide IMEI field based on asset type
+        function toggleImeiField() {
+            const assetType = $('#id_type').val();
+            const imeiField = $('#id_imei_number').closest('.form-group');
+            
+            if (assetType === 'mobile' || assetType === 'tablet') {
+                imeiField.show();
+            } else {
+                imeiField.hide();
+                $('#id_imei_number').val('');
+            }
+        }
+        
+        // Initial toggle
+        toggleImeiField();
+        
+        // Toggle on change
+        $('#id_type').change(toggleImeiField);
+        
+        // Show/hide storage fields based on storage type
+        function toggleStorageFields() {
+            const storageType = $('#id_storage_type').val();
+            const ssdField = $('#id_ssd_capacity').closest('.form-group');
+            const hddField = $('#id_hdd_capacity').closest('.form-group');
+            
+            if (storageType === 'ssd') {
+                ssdField.show();
+                hddField.hide();
+                $('#id_hdd_capacity').val('');
+            } else if (storageType === 'hdd') {
+                ssdField.hide();
+                hddField.show();
+                $('#id_ssd_capacity').val('');
+            } else if (storageType === 'hybrid') {
+                ssdField.show();
+                hddField.show();
+            } else {
+                ssdField.hide();
+                hddField.hide();
+                $('#id_ssd_capacity').val('');
+                $('#id_hdd_capacity').val('');
+            }
+        }
+        
+        // Initial toggle
+        toggleStorageFields();
+        
+        // Toggle on change
+        $('#id_storage_type').change(toggleStorageFields);
     });
 </script>
 {% endblock %}

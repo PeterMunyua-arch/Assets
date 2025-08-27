@@ -1,339 +1,292 @@
 {% extends 'asset/base.html' %}
-{% block title %} Asset Inventory {% endblock %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Asset Reports Dashboard{% endblock %}
 
 {% block content %}
-<div class="inventory-container">
-    <div class="inventory-header">
-        <div class="header-content">
-            <h1><i class="fas fa-boxes"></i> Asset Inventory</h1>
-            <p class="subtitle">View and manage all company assets</p>
+<div class="container-fluid py-4 reports-dashboard">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-chart-pie mr-2"></i>Asset Reports Dashboard
+        </h1>
+        <div class="export-actions">
+            <button class="btn btn-sm btn-outline-secondary mr-2">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <button class="btn btn-sm btn-primary">
+                <i class="fas fa-download"></i> Export All
+            </button>
         </div>
-        <div class="header-actions">
-            <div class="quick-reports">
-                <a href="{% url 'unallocated_assets_report' %}" class="report-btn">
-                    <i class="fas fa-file-excel"></i> Unallocated Report
-                </a>
-                <a href="{% url 'allocated_assets_report' %}" class="report-btn">
-                    <i class="fas fa-clipboard-check"></i> Allocated Report
-                </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Assets</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_assets|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-laptop fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Allocated Assets</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ allocated_assets|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Unallocated Assets</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ unallocated_assets|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Departments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ departments.count|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="inventory-table-container">
-        <div class="table-responsive">
-            <table class="asset-table">
-                <thead>
-                    <tr>
-                        <th class="sortable">Name <i class="fas fa-sort"></i></th>
-                        <th>Model</th>
-                        <th>Specifications</th>
-                        <th class="text-right">Purchase Price</th>
-                        <th>Purchase Date</th>
-                        <th>Serial Number</th>
-                        <th>Company</th>
-                        <th class="actions-column">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for asset in assets %}
-                    <tr>
-                        <td>
-                            <div class="asset-name">
-                                <i class="fas fa-laptop icon-indicator"></i>
-                                {{ asset.name }}
+    <!-- Reports Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h5 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-alt mr-2"></i>Available Reports
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row">
+                        <!-- Total Assets Report -->
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card report-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="icon-circle bg-primary mb-3">
+                                        <i class="fas fa-laptop text-white"></i>
+                                    </div>
+                                    <h5 class="card-title">Total Assets Report</h5>
+                                    <p class="card-text">Complete inventory of all assets in the system</p>
+                                    <div class="mt-3">
+                                        <a href="{% url 'asset_report' 'total_assets' %}?format=excel" class="btn btn-sm btn-primary mr-2">
+                                            <i class="fas fa-download"></i> Excel
+                                        </a>
+                                        <a href="{% url 'all_assets_report' %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                        <td>{{ asset.model }}</td>
-                        <td class="specs-cell">{{ asset.specs|truncatechars:30 }}</td>
-                        <td class="text-right">${{ asset.purchase_price }}</td>
-                        <td>{{ asset.purchase_date|date:"Y-m-d" }}</td>
-                        <td class="serial-cell">{{ asset.serial_number }}</td>
-                        <td>{{ asset.company }}</td>
-                        <td class="actions-cell">
-                            <button class="action-btn return-btn" title="Return Asset">
-                                <i class="fas fa-exchange-alt"></i>
-                            </button>
-                            <button class="action-btn details-btn" title="View Details">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="empty-state">
-                            <div class="empty-content">
-                                <i class="fas fa-box-open"></i>
-                                <h3>No Assets Found</h3>
-                                <p>There are currently no assets in the inventory</p>
+                        </div>
+
+                        <!-- Allocated Assets Report -->
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card report-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="icon-circle bg-success mb-3">
+                                        <i class="fas fa-check-circle text-white"></i>
+                                    </div>
+                                    <h5 class="card-title">Allocated Assets Report</h5>
+                                    <p class="card-text">Assets currently assigned to employees</p>
+                                    <div class="mt-3">
+                                        <a href="{% url 'asset_report' 'allocated_assets' %}?format=excel" class="btn btn-sm btn-success mr-2">
+                                            <i class="fas fa-download"></i> Excel
+                                        </a>
+                                        <a href="{% url 'allocated_assets_report' %}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+
+                        <!-- Unallocated Assets Report -->
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card report-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="icon-circle bg-info mb-3">
+                                        <i class="fas fa-times-circle text-white"></i>
+                                    </div>
+                                    <h5 class="card-title">Unallocated Assets Report</h5>
+                                    <p class="card-text">Assets available for assignment</p>
+                                    <div class="mt-3">
+                                        <a href="{% url 'asset_report' 'unallocated_assets' %}?format=excel" class="btn btn-sm btn-info mr-2 text-white">
+                                            <i class="fas fa-download"></i> Excel
+                                        </a>
+                                        <a href="{% url 'unallocated_assets_report' %}" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assets by Status -->
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card report-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="icon-circle bg-warning mb-3">
+                                        <i class="fas fa-tags text-white"></i>
+                                    </div>
+                                    <h5 class="card-title">Assets by Status</h5>
+                                    <p class="card-text">Assets grouped by their status (New, Old, Damaged)</p>
+                                    <div class="dropdown mt-3">
+                                        <button class="btn btn-sm btn-warning dropdown-toggle text-white" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-download"></i> Download by Status
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_status' %}?format=excel">All Statuses</a></li>
+                                            {% for status_key, status_name in status_choices %}
+                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_status' %}?status={{ status_key }}&format=excel">{{ status_name }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assets by Department -->
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card report-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="icon-circle bg-secondary mb-3">
+                                        <i class="fas fa-building text-white"></i>
+                                    </div>
+                                    <h5 class="card-title">Assets by Department</h5>
+                                    <p class="card-text">Assets grouped by employee department</p>
+                                    <div class="dropdown mt-3">
+                                        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="deptDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-download"></i> Download by Department
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="deptDropdown">
+                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_department' %}?format=excel">All Departments</a></li>
+                                            {% for department in departments %}
+                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_department' %}?department={{ department }}&format=excel">{{ department }}</a></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Reports Placeholder -->
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card report-card h-100">
+                                <div class="card-body text-center">
+                                    <div class="icon-circle bg-dark mb-3">
+                                        <i class="fas fa-chart-bar text-white"></i>
+                                    </div>
+                                    <h5 class="card-title">Custom Reports</h5>
+                                    <p class="card-text">Generate custom reports based on specific criteria</p>
+                                    <div class="mt-3">
+                                        <a href="#" class="btn btn-sm btn-dark" data-toggle="modal" data-target="#customReportModal">
+                                            <i class="fas fa-cog"></i> Configure
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Main Container */
-    .inventory-container {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-        margin-bottom: 2rem;
+    .reports-dashboard {
+        padding: 20px;
     }
-
-    /* Header Styles */
-    .inventory-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.5rem 2rem;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-bottom: 1px solid #e2e8f0;
+    
+    .report-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e3e6f0;
+        border-radius: 0.5rem;
     }
-
-    .header-content h1 {
-        font-size: 1.75rem;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .header-content h1 i {
-        color: #4f46e5;
-    }
-
-    .subtitle {
-        color: #64748b;
-        font-size: 0.95rem;
-    }
-
-    /* Report Buttons */
-    .quick-reports {
-        display: flex;
-        gap: 12px;
-    }
-
-    .report-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 0.65rem 1.25rem;
-        background-color: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        color: #4f46e5;
-        font-weight: 500;
+    
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         text-decoration: none;
-        transition: all 0.2s ease;
-        font-size: 0.9rem;
     }
-
-    .report-btn:hover {
-        background-color: #f8fafc;
-        border-color: #c7d2fe;
-        transform: translateY(-1px);
+    
+    .report-card .card-body {
+        padding: 1.5rem;
     }
-
-    .report-btn i {
-        font-size: 1rem;
-    }
-
-    /* Table Styles */
-    .inventory-table-container {
-        padding: 0 2rem 2rem;
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .asset-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 1000px;
-    }
-
-    .asset-table th {
-        background-color: #f8fafc;
-        color: #475569;
-        font-weight: 600;
-        padding: 1rem 1.25rem;
-        text-align: left;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .asset-table td {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid #e2e8f0;
-        color: #334155;
-        vertical-align: middle;
-    }
-
-    .asset-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .asset-table tr:hover td {
-        background-color: #f8fafc;
-    }
-
-    /* Special Cell Styles */
-    .asset-name {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 500;
-    }
-
-    .icon-indicator {
-        color: #94a3b8;
-        font-size: 1.1rem;
-    }
-
-    .specs-cell {
-        color: #64748b;
-        max-width: 200px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .serial-cell {
-        font-family: 'Courier New', monospace;
-        color: #4f46e5;
-        font-weight: 500;
-    }
-
-    .text-right {
-        text-align: right;
-    }
-
-    /* Action Buttons */
-    .actions-cell {
-        white-space: nowrap;
-    }
-
-    .action-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        border: none;
-        background: transparent;
-        color: #94a3b8;
-        cursor: pointer;
-        margin: 0 2px;
-        transition: all 0.2s ease;
+    
+    .icon-circle {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        height: 60px;
+        width: 60px;
+        border-radius: 50%;
     }
-
-    .action-btn:hover {
-        background-color: #f1f5f9;
-        color: #4f46e5;
+    
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
     }
-
-    .return-btn:hover {
-        background-color: #ecfdf5;
-        color: #10b981;
+    
+    .border-left-primary {
+        border-left: 4px solid #4e73df !important;
     }
-
-    /* Empty State */
-    .empty-state {
-        padding: 3rem 1rem;
-        text-align: center;
+    
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
     }
-
-    .empty-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 400px;
-        margin: 0 auto;
+    
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
     }
-
-    .empty-content i {
-        font-size: 3rem;
-        color: #cbd5e1;
-        margin-bottom: 1rem;
-    }
-
-    .empty-content h3 {
-        color: #475569;
-        margin-bottom: 0.5rem;
-    }
-
-    .empty-content p {
-        color: #94a3b8;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 1200px) {
-        .inventory-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-        
-        .quick-reports {
-            width: 100%;
-            flex-wrap: wrap;
-        }
-        
-        .report-btn {
-            flex: 1;
-            justify-content: center;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .inventory-header {
-            padding: 1.25rem;
-        }
-        
-        .inventory-table-container {
-            padding: 0 1rem 1.5rem;
-        }
+    
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
     }
 </style>
-
-<script>
-    $(document).ready(function() {
-        // Add hover effect to table rows
-        $('.asset-table tbody tr').hover(
-            function() {
-                $(this).css('transform', 'translateX(4px)');
-            },
-            function() {
-                $(this).css('transform', 'translateX(0)');
-            }
-        );
-
-        // Action button functionality
-        $('.return-btn').click(function() {
-            const assetName = $(this).closest('tr').find('.asset-name').text().trim();
-            alert(`Initiate return process for: ${assetName}`);
-            // Actual implementation would redirect or show a modal
-            // window.location.href = `/return/${assetId}/`;
-        });
-
-        $('.details-btn').click(function() {
-            const assetId = $(this).closest('tr').data('asset-id');
-            alert(`Show details for asset ID: ${assetId}`);
-            // window.location.href = `/assets/${assetId}/`;
-        });
-    });
-</script>
 {% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'asset/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Current Asset Allocation Status</h2>
+    
+    <div class="alert alert-info">
+        <strong>Summary:</strong>
+        <span>{{ allocated_count }} assets currently allocated</span> | 
+        <span>{{ unallocated_count }} assets available</span>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Currently Allocated Assets</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Assigned To</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for allocation in current_allocations %}
+                    <tr>
+                        <td>{{ allocation.asset.name }} ({{ allocation.asset.serial_number }})</td>
+                        <td>{{ allocation.asset.get_type_display }}</td>
+                        <td>{{ allocation.employee_allocated }}</td>
+                        <td>{{ allocation.employee_allocated.department }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No assets currently allocated</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0">Available Assets</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Serial Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in unallocated_assets %}
+                    <tr>
+                        <td>{{ asset.name }}</td>
+                        <td>{{ asset.get_type_display }}</td>
+                        <td>{{ asset.serial_number }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No unallocated assets available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

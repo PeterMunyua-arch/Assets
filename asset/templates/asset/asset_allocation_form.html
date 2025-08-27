@@ -23,41 +23,113 @@
                 
                 <div class="form-grid">
                     {% for field in form %}
-                    <div class="form-group {% if field.errors %}has-error{% endif %}">
-                        <label for="{{ field.id_for_label }}" class="form-label">
-                            {{ field.label }}
-                            {% if field.field.required %}
-                            <span class="text-danger">*</span>
+                        {% if field.name != 'applications' and field.name != 'include_all_applications' and field.name != 'other_applications' %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            
+                            {% if field.name in 'asset,employee_allocated,employee_returning,asset_status' %}
+                                {{ field }}
+                            {% elif field.name in 'allocation_date,return_date' %}
+                                <input type="date" 
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       name="{{ field.name }}"
+                                       value="{{ field.value|default_if_none:''|date:'Y-m-d' }}"
+                                       {% if field.field.required %}required{% endif %}>
+                            {% else %}
+                                <input type="{{ field.field.widget.input_type }}" 
+                                       class="form-control"
+                                       id="{{ field.id_for_label }}"
+                                       name="{{ field.name }}"
+                                       value="{{ field.value|default_if_none:'' }}"
+                                       {% if field.field.required %}required{% endif %}>
                             {% endif %}
-                        </label>
-                        
-                        {% if field.name in 'asset,employee_allocated,employee_returning,asset_status' %}
-                            {{ field }}
-                        {% elif field.name in 'allocation_date,return_date' %}
-                            <input type="date" 
-                                   class="form-control"
-                                   id="{{ field.id_for_label }}"
-                                   name="{{ field.name }}"
-                                   value="{{ field.value|default_if_none:''|date:'Y-m-d' }}"
-                                   {% if field.field.required %}required{% endif %}>
-                        {% else %}
-                            <input type="{{ field.field.widget.input_type }}" 
-                                   class="form-control"
-                                   id="{{ field.id_for_label }}"
-                                   name="{{ field.name }}"
-                                   value="{{ field.value|default_if_none:'' }}"
-                                   {% if field.field.required %}required{% endif %}>
+                            
+                            {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            
+                            {% for error in field.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
                         {% endif %}
-                        
-                        {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
-                        
-                        {% for error in field.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    </div>
                     {% endfor %}
+                    
+                    <!-- Applications Section -->
+                    {% if form.applications or form.include_all_applications %}
+                    <div class="form-group applications-section">
+                        <h4 class="section-title mb-3">
+                            <i class="fas fa-laptop-code text-primary mr-2"></i>
+                            Business Applications
+                        </h4>
+                        
+                        {% if form.include_all_applications %}
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                       class="form-check-input" 
+                                       id="{{ form.include_all_applications.id_for_label }}"
+                                       name="{{ form.include_all_applications.name }}"
+                                       {% if form.include_all_applications.value %}checked{% endif %}>
+                                <label class="form-check-label" for="{{ form.include_all_applications.id_for_label }}">
+                                    {{ form.include_all_applications.label }}
+                                </label>
+                            </div>
+                            {% if form.include_all_applications.help_text %}
+                            <small class="form-text text-muted">{{ form.include_all_applications.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if form.applications %}
+                        <div id="applications-list" class="mt-3 {% if form.include_all_applications.value %}d-none{% endif %}">
+                            <label class="form-label mb-2">Select Applications to Include:</label>
+                            <div class="applications-grid">
+                                {% for choice in form.applications %}
+                                <div class="application-checkbox">
+                                    <div class="form-check">
+                                        <input type="checkbox" 
+                                               class="form-check-input" 
+                                               name="{{ form.applications.name }}"
+                                               value="{{ choice.data.value }}"
+                                               id="app_{{ forloop.counter }}"
+                                               {% if choice.data.selected %}checked{% endif %}>
+                                        <label class="form-check-label" for="app_{{ forloop.counter }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.applications.help_text %}
+                            <small class="form-text text-muted">{{ form.applications.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Other Applications Description Field -->
+                        {% if form.other_applications %}
+                        <div class="form-group mt-3">
+                            <label for="{{ form.other_applications.id_for_label }}" class="form-label">
+                                {{ form.other_applications.label }}
+                            </label>
+                            {{ form.other_applications }}
+                            {% if form.other_applications.help_text %}
+                            <small class="form-text text-muted">{{ form.other_applications.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.other_applications.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
                 
                 <div class="form-actions">
@@ -65,7 +137,7 @@
                         <i class="fas fa-{% if '/return/' in request.path %}check-circle{% else %}save{% endif %} mr-2"></i>
                         {% if '/return/' in request.path %}Complete Return{% else %}Allocate Asset{% endif %}
                     </button>
-                    <a href="{% url 'asset_report' %}" class="btn btn-outline">
+                    <a href="{% url 'all_assets_report' %}" class="btn btn-outline">
                         <i class="fas fa-times mr-2"></i>
                         Cancel
                     </a>
@@ -78,7 +150,7 @@
 <style>
     /* Form-specific styles */
     .container {
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
     }
     
@@ -106,7 +178,7 @@
         color: var(--dark);
     }
     
-    .form-control, select.form-control {
+    .form-control, select.form-control, textarea.form-control {
         width: 100%;
         padding: 0.75rem 1rem;
         font-size: 1rem;
@@ -119,7 +191,12 @@
         transition: var(--transition);
     }
     
-    .form-control:focus, select.form-control:focus {
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-control:focus, select.form-control:focus, textarea.form-control:focus {
         border-color: var(--primary);
         outline: 0;
         box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
@@ -146,6 +223,68 @@
         padding-top: 1.5rem;
         border-top: 1px solid var(--light-gray);
         margin-top: 1.5rem;
+    }
+    
+    /* Applications Section Styles */
+    .applications-section {
+        background-color: var(--primary-light);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border-left: 4px solid var(--primary);
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+    
+    .applications-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+    
+    .application-checkbox {
+        padding: 0.75rem;
+        background-color: white;
+        border: 1px solid var(--light-gray);
+        border-radius: var(--border-radius-sm);
+        transition: var(--transition);
+    }
+    
+    .application-checkbox:hover {
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+    }
+    
+    .application-checkbox .form-check {
+        margin: 0;
+    }
+    
+    .application-checkbox .form-check-label {
+        font-weight: 500;
+        color: var(--dark);
+    }
+    
+    /* Form Check Styles */
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0;
+    }
+    
+    .form-check-input {
+        width: 1.1em;
+        height: 1.1em;
+        margin-top: 0;
+    }
+    
+    .form-check-label {
+        margin-bottom: 0;
+        cursor: pointer;
     }
     
     /* Date picker field styling */
@@ -200,6 +339,14 @@
         .form-actions .btn {
             width: 100%;
         }
+        
+        .applications-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .applications-section {
+            padding: 1rem;
+        }
     }
 </style>
 
@@ -220,7 +367,46 @@
             }
         });
         
-        // Conditional logic can be added here if needed
+        // Toggle applications list based on include_all checkbox
+        $('#{{ form.include_all_applications.id_for_label }}').change(function() {
+            const applicationsList = $('#applications-list');
+            if (this.checked) {
+                applicationsList.addClass('d-none');
+                // Uncheck all application checkboxes when "include all" is checked
+                $('input[name="applications"]').prop('checked', false);
+            } else {
+                applicationsList.removeClass('d-none');
+            }
+        });
+        
+        // Auto-populate applications based on selected asset
+        $('#id_asset').change(function() {
+            const assetId = $(this).val();
+            if (assetId) {
+                // Fetch asset details via AJAX
+                $.ajax({
+                    url: '/api/asset/' + assetId + '/applications/',
+                    method: 'GET',
+                    success: function(data) {
+                        if (data.applications && data.applications.length > 0) {
+                            // Check the applications that are available on the asset
+                            $('input[name="applications"]').each(function() {
+                                const appValue = $(this).val();
+                                $(this).prop('checked', data.applications.includes(appValue));
+                            });
+                        }
+                        
+                        // Populate other applications description if available
+                        if (data.other_applications) {
+                            $('#id_other_applications').val(data.other_applications);
+                        }
+                    },
+                    error: function() {
+                        console.log('Error fetching asset applications');
+                    }
+                });
+            }
+        });
     });
 </script>
 {% endblock %}

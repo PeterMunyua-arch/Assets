@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TABLET/IPAD ISSUANCE & AGREEMENT</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            font-size: 14px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .form-field {
+            display: inline-block;
+            min-width: 200px;
+            border-bottom: 1px solid #000;
+            padding: 0 5px;
+            margin: 0 5px;
+            height: 20px;
+        }
+        .signature-box {
+            height: 60px;
+            border-bottom: 1px solid #000;
+            margin: 10px 0;
+            width: 300px;
+        }
+        .terms {
+            font-size: 12px;
+            margin: 15px 0;
+            line-height: 1.4;
+        }
+        .terms ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 3px 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        @media print {
+            button { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>TABLET/IPAD ISSUANCE & AGREEMENT &nbsp;&nbsp;&nbsp; WPL/FORM/ICT/11/REV 3</h1>
+    </div>
+    
+    <div class="section">
+        <p><strong>FROM:</strong> ICT DEPARTMENT</p>
+        <p><strong>TO:</strong> <span class="form-field">{{ allocation.employee_allocated.get_full_name }}</span> PRINCIPAL</p>
+        <p><strong>DATE:</strong> <span class="form-field">{{ allocation.allocation_date|date:"d/m/Y" }}</span></p>
+        <p><strong>ID NO:</strong> <span class="form-field">{{ allocation.employee_allocated.employee_id }}</span></p>
+        <p><strong>MOBILE NO:</strong> <span class="form-field">{{ allocation.employee_allocated.phone_number }}</span></p>
+    </div>
+    
+    <div class="section">
+        <p><strong>DEVICE DETAILS</strong></p>
+        <p>As per our records, the company has provided you with the following tablet(s)</p>
+        <ul>
+            <li>Model: <span class="form-field">{{ asset.model }}</span></li>
+            <li>Serial No. <span class="form-field">{{ asset.serial_number }}</span></li>
+            <li>IMEI No. <span class="form-field">{{ asset.imei_number }}</span></li>
+            <li>Condition: <span class="form-field">{{ asset.condition }}</span></li>
+            <li>Accessories: <span class="form-field">{{ asset.accessories }}</span></li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <p><strong>DEVICE AGREEMENT</strong></p>
+        <p>
+            <span class="form-field">{{ allocation.employee_allocated.get_full_name }}</span>
+            of Identification Number <span class="form-field">{{ allocation.employee_allocated.employee_id }}</span>
+            Hereby confirm that I have received a tablet of IMEI No. 
+            <span class="form-field">{{ asset.imei_number }}</span> From my employer,
+            Wessex Pharmaceuticals Limited.
+        </p>
+    </div>
+    
+    <div class="section">
+        <p><strong>TERMS AND CONDITIONS:</strong></p>
+        <p>Wessex Pharmaceuticals Limited has provided this device inclusive of hardware
+        and software, subject to the following conditions:</p>
+        
+        <div class="terms">
+            <p><strong>1. Ownership and Use of the Device</strong></p>
+            <ul>
+                <li>The device remains the sole and exclusive property of Wessex Pharmaceuticals Ltd.</li>
+                <li>Employees accept responsibility for the care of device and will treat all the equipment checked out to them in a respectful manner.</li>
+                <li>The device is provided to remotely complete work pertaining to the roles of employee employment with Wessex Pharmaceuticals Ltd.</li>
+                <li>Any misuse of the device may result in a demand to return said device to Wessex Pharmaceuticals Ltd and other necessary action can be taken. The company reserves the right to view how frequently an employee uses the device.</li>
+                <li>Employees agree to keep the device charged and in operating condition as necessary to work.</li>
+                <li>Wessex Pharmaceuticals Ltd shall monitor the device usage.</li>
+                <li>Use of this device to record or consume pornographic or illegal material is strictly prohibited and can result in disciplinary action up to and including dismissal of employee and placing legal charges.</li>
+            </ul>
+            
+            <p><strong>2. Damage or Loss of the device</strong></p>
+            <ul>
+                <li>Agree to safeguard the device against accidents & damage. The device should have protective covers and screen guards as the damage from unprotected devices should be treated as negligence.</li>
+                <li>The device should NEVER be left in a car unattended. Always carry your device with you. Any theft/loss involving a car break-in will be treated as negligence unless it's by violence.</li>
+                <li>Damage, loss, or theft should be reported to the Employer immediately for further action.</li>
+                <li>If, due to negligence, Employee loses or severely damages the device within 12 months from the date hereof, Same employee shall be required to offset the costs for another replacement device at their own cost.</li>
+                <li>If, due to negligence, Employee loses or severely damages the device after 12 months date hereof, they shall be required to reimburse the company 50% of the value of the device.</li>
+            </ul>
+            
+            <p><strong>3. Confidentiality & Security</strong></p>
+            <ul>
+                <li>Employee is responsible for using and safeguarding the device and any data stored on or processed by it to comply with legal and contractual obligations.</li>
+                <li>Employees will password protect the device from any third party always. Passwords must be known to the IT dept to be able to use the device in the event of employee absence.</li>
+                <li>Any data stored on the device remain the property of the company.</li>
+            </ul>
+            
+            <p><strong>4. Return of the device</strong></p>
+            <ul>
+                <li>The device is to be returned to Wessex Pharmaceuticals Ltd upon resignation or termination of employment with the Company. The company also reserves the right to take back the equipment for any other reason whatsoever.</li>
+                <li>All parts of the device, including power cable, OTG cable device cover etc. shall be returned.</li>
+                <li>The device shall be returned to the company in good working condition as agreed by the IT Dept.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section">
+        <p>I have read carefully through the terms and conditions of the handling on device from Wessex Pharmaceuticals Ltd and understand the expectation of me regarding the borrowing of the equipment.</p>
+        
+        <p><strong>Employee Signature</strong></p>
+        <p>Employee Name: <span class="form-field">{{ allocation.employee_allocated.get_full_name }}</span></p>
+        <div class="signature-box"></div>
+        <p>Employee Signature: _________________________</p>
+        <p>Date: _________________________</p>
+    </div>
+    
+    <div style="margin-top: 30px; text-align: center;">
+        <button onclick="window.print()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Print Form
+        </button>
+    </div>
+</body>
+</html>

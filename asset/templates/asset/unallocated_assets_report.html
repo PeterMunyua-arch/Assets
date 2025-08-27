@@ -1,373 +1,158 @@
 {% extends 'asset/base.html' %}
-{% block title %} Unallocated Assets Report {% endblock %}
 
 {% block content %}
-<div class="report-container">
-    <div class="report-header">
-        <div class="header-content">
-            <h1><i class="fas fa-box-open"></i> Unallocated Assets Report</h1>
-            <p class="subtitle">Assets currently not assigned to any employee</p>
-        </div>
-        <div class="header-actions">
-            <button class="export-btn" onclick="exportToExcel()">
-                <i class="fas fa-file-export"></i> Export to Excel
-            </button>
-        </div>
-    </div>
+<h2>Unallocated Assets Report</h2>
 
-    <div class="search-container">
-        <form class="search-form" action="{% url 'search' %}" method="get">
-            <input type="text" name="q" class="search-input" placeholder="Search assets by name or serial..." required>
-            <button type="submit" class="search-btn">
-                <i class="fas fa-search"></i>
-            </button>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form method="get" class="filter-form">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Filters</h4>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="asset_type">Asset Type</label>
+                        <select name="asset_type" id="asset_type" class="form-control">
+                            <option value="">All Types</option>
+                            {% for type in asset_types %}
+                            <option value="{{ type.0 }}" {% if current_filters.asset_type == type.0 %}selected{% endif %}>
+                                {{ type.1 }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="min_price">Min Price</label>
+                                <input type="number" name="min_price" id="min_price" 
+                                       class="form-control" value="{{ current_filters.min_price }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="max_price">Max Price</label>
+                                <input type="number" name="max_price" id="max_price" 
+                                       class="form-control" value="{{ current_filters.max_price }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'unallocated_assets_report' %}" class="btn btn-secondary">Reset</a>
+                </div>
+            </div>
         </form>
     </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Summary</h4>
+            </div>
+            <div class="card-body">
+                <p>Total Unallocated Assets: {{ total_unallocated }}</p>
+                
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="report-table-container">
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>Unallocated Assets ({{ total_unallocated }})</h4>
+        <a href="?export=csv{% if current_filters.asset_type %}&asset_type={{ current_filters.asset_type }}{% endif %}{% if current_filters.min_price %}&min_price={{ current_filters.min_price }}{% endif %}{% if current_filters.max_price %}&max_price={{ current_filters.max_price }}{% endif %}" 
+           class="btn btn-sm btn-success">
+            Export to CSV
+        </a>
+    </div>
+    <div class="card-body">
+        {% if unallocated_assets %}
         <div class="table-responsive">
-            <table class="unallocated-table">
+            <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th class="sortable" onclick="sortTable(0)">Asset Name <i class="fas fa-sort"></i></th>
-                        <th class="sortable" onclick="sortTable(1)">Serial Number <i class="fas fa-sort"></i></th>
-                        <th>Status</th>
-                        <th class="actions-column">Actions</th>
+                        <th>Serial Number</th>
+                        <th>Type</th>
+                        <th>Model</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price</th>
+                        <th>Specs</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for asset_allocation in unallocated_assets %}
-                    <tr class="asset-row" onclick="showAssetDetails('{{ asset_allocation.id }}')">
-                        <td>
-                            <div class="asset-info">
-                                <i class="fas fa-laptop icon"></i>
-                                <span class="asset-name">{{ asset_allocation.name }}</span>
-                            </div>
-                        </td>
-                        <td class="serial-number">{{ asset_allocation.serial_number }}</td>
-                        <td>
-                            <span class="status-badge unallocated">Unallocated</span>
-                        </td>
-                        <td class="actions-cell">
-                            <button class="action-btn allocate-btn" title="Allocate Asset" onclick="event.stopPropagation();allocateAsset('{{ asset_allocation.id }}')">
-                                <i class="fas fa-user-plus"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% empty %}
+                    {% for asset in unallocated_assets %}
                     <tr>
-                        <td colspan="4" class="empty-state">
-                            <div class="empty-content">
-                                <i class="fas fa-check-circle"></i>
-                                <h3>All Assets Allocated</h3>
-                                <p>There are currently no unallocated assets in inventory</p>
-                            </div>
+                        <td>{{ asset.serial_number }}</td>
+                        <td>{{ asset.get_type_display }}</td>
+                        <td>{{ asset.model }}</td>
+                        <td>{{ asset.purchase_date }}</td>
+                        <td>${{ asset.purchase_price }}</td>
+                        <td>{{ asset.specs|truncatechars:50 }}</td>
+                        <td>
+                            <a href="{% url 'asset_allocation_form' %}?asset_id={{ asset.id }}" 
+                               class="btn btn-sm btn-primary">Allocate</a>
+                            <a href="{% url 'asset_allocation_history' asset.id %}" 
+                               class="btn btn-sm btn-info">History</a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="alert alert-info">
+            No unallocated assets found matching your criteria.
+        </div>
+        {% endif %}
     </div>
 </div>
 
-<style>
-    /* Main Container */
-    .report-container {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
+{% endblock %}
 
-    /* Header Styles */
-    .report-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.5rem 2rem;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .header-content h1 {
-        font-size: 1.75rem;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .header-content h1 i {
-        color: #4f46e5;
-    }
-
-    .subtitle {
-        color: #64748b;
-        font-size: 0.95rem;
-    }
-
-    /* Search Container */
-    .search-container {
-        padding: 0 2rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .search-form {
-        display: flex;
-        max-width: 400px;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .search-input {
-        flex: 1;
-        padding: 0.75rem 1.25rem;
-        border: none;
-        font-size: 1rem;
-        outline: none;
-    }
-
-    .search-btn {
-        padding: 0 1.25rem;
-        background-color: #4f46e5;
-        color: white;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .search-btn:hover {
-        background-color: #4338ca;
-    }
-
-    /* Export Button */
-    .export-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 0.65rem 1.25rem;
-        background-color: #4f46e5;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .export-btn:hover {
-        background-color: #4338ca;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-    }
-
-    /* Table Styles */
-    .report-table-container {
-        padding: 0 2rem 2rem;
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .unallocated-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .unallocated-table th {
-        background-color: #f8fafc;
-        color: #475569;
-        font-weight: 600;
-        padding: 1rem 1.25rem;
-        text-align: left;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #e2e8f0;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-
-    .unallocated-table th:hover {
-        background-color: #e2e8f0;
-    }
-
-    .unallocated-table td {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid #e2e8f0;
-        color: #334155;
-        vertical-align: middle;
-    }
-
-    .unallocated-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* Asset Row Styles */
-    .asset-row {
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-
-    .asset-row:hover {
-        background-color: #f8fafc;
-        transform: translateX(4px);
-    }
-
-    .asset-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .asset-name {
-        font-weight: 500;
-    }
-
-    .icon {
-        color: #94a3b8;
-        font-size: 1.1rem;
-    }
-
-    .serial-number {
-        font-family: 'Courier New', monospace;
-        color: #4f46e5;
-        font-weight: 500;
-    }
-
-    /* Status Badge */
-    .status-badge {
-        display: inline-block;
-        padding: 0.35rem 0.75rem;
-        border-radius: 50px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .unallocated {
-        background-color: #fee2e2;
-        color: #dc2626;
-    }
-
-    /* Action Buttons */
-    .actions-cell {
-        white-space: nowrap;
-    }
-
-    .action-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        border: none;
-        background: transparent;
-        color: #94a3b8;
-        cursor: pointer;
-        margin: 0 2px;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .action-btn:hover {
-        background-color: #f1f5f9;
-        color: #4f46e5;
-    }
-
-    .allocate-btn:hover {
-        background-color: #ecfdf5;
-        color: #10b981;
-    }
-
-    /* Empty State */
-    .empty-state {
-        padding: 3rem 1rem;
-        text-align: center;
-    }
-
-    .empty-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 400px;
-        margin: 0 auto;
-    }
-
-    .empty-content i {
-        font-size: 3rem;
-        color: #10b981;
-        margin-bottom: 1rem;
-    }
-
-    .empty-content h3 {
-        color: #475569;
-        margin-bottom: 0.5rem;
-    }
-
-    .empty-content p {
-        color: #94a3b8;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .report-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1.25rem;
-        }
-        
-        .report-table-container {
-            padding: 0 1rem 1.5rem;
-        }
-        
-        .export-btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-</style>
-
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Show asset details when row is clicked
-    function showAssetDetails(assetId) {
-        console.log(`Showing details for asset ID: ${assetId}`);
-        // Implement actual details view functionality
-        // window.location.href = `/assets/${assetId}/`;
-    }
-
-    // Allocate asset button handler
-    function allocateAsset(assetId) {
-        console.log(`Allocating asset ID: ${assetId}`);
-        // Implement actual allocation functionality
-        // window.location.href = `/allocate/${assetId}/`;
-    }
-
-    // Export to Excel functionality
-    function exportToExcel() {
-        console.log("Exporting to Excel...");
-        // Implement actual export functionality
-    }
-
-    // Simple table sorting function
-    function sortTable(columnIndex) {
-        console.log(`Sorting by column ${columnIndex}`);
-        // Implement actual sorting functionality
-    }
-
-    // Handle search form submission
-    document.querySelector('.search-form').addEventListener('submit', function(e) {
-        const query = document.querySelector('.search-input').value.trim();
-        if (!query) {
-            e.preventDefault();
-            alert('Please enter a search term');
+    // Type distribution chart
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    const typeLabels = [];
+    const typeData = [];
+    
+    {% for item in unallocated_by_type %}
+    typeLabels.push('{{ item.type }}');
+    typeData.push({{ item.count }});
+    {% endfor %}
+    
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                data: typeData,
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', 
+                    '#e74a3b', '#858796', '#5a5c69', '#2e59d9'
+                ],
+                hoverBackgroundColor: [
+                    '#2e59d9', '#17a673', '#2c9faf', '#dda20a', 
+                    '#be2617', '#656776', '#3a3d4b', '#1c3cd9'
+                ],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
         }
     });
 </script>

@@ -1,0 +1,42 @@
+{% extends 'asset/base.html' %}
+
+{% block report_content %}
+<table class="table table-striped table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Serial Number</th>
+            <th>Asset Type</th>
+            <th>Model</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for asset in assets %}
+        <tr>
+            <td>{{ asset.serial_number }}</td>
+            <td>{{ asset.get_type_display }}</td>
+            <td>{{ asset.model }}</td>
+            <td>{{ asset.company.name }}</td>
+            <td>
+                {% if asset.is_allocated %}
+                    <span class="badge badge-success">Allocated</span>
+                {% else %}
+                    <span class="badge badge-secondary">Unallocated</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'asset_detail' asset.id %}" class="btn btn-sm btn-info">View</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">No assets found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% include 'asset/partials/pagination.html' %}
+{% endblock %}

@@ -1,26 +1,29 @@
 {% extends 'asset/base.html' %}
-{% block title %}Dashboard{% endblock %}
+{% load humanize %}
+
+{% block title %}Asset Management Dashboard{% endblock %}
 
 {% block content %}
 <style>
     :root {
-        --primary: #4361ee;
-        --primary-light: #e6e9ff;
-        --secondary: #3f37c9;
-        --success: #4cc9f0;
-        --danger: #f72585;
-        --warning: #f8961e;
+        --primary: #3a56b4;
+        --primary-light: #e8edff;
+        --secondary: #2c4293;
+        --success: #4caf50;
+        --danger: #f44336;
+        --warning: #ff9800;
+        --info: #2196f3;
         --light: #f8f9fa;
         --dark: #212529;
         --gray: #6c757d;
         --light-gray: #e9ecef;
-        --border-radius: 12px;
-        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        --transition: all 0.3s ease;
+        --border-radius: 8px;
+        --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        --transition: all 0.2s ease;
     }
 
     .dashboard-container {
-        padding: 2rem;
+        padding: 1.5rem;
         max-width: 1400px;
         margin: 0 auto;
     }
@@ -29,142 +32,156 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .dashboard-title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
         font-weight: 600;
         color: var(--dark);
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+        margin: 0;
     }
 
+    .dashboard-title i {
+        color: var(--primary);
+    }
+
+    /* Metrics Grid - Compact Version */
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
     }
 
     .metric-card {
         background: white;
         border-radius: var(--border-radius);
         box-shadow: var(--box-shadow);
-        padding: 1.5rem;
+        padding: 1.25rem;
         transition: var(--transition);
+        position: relative;
+        border-left: 4px solid var(--primary);
     }
 
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .metric-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
     }
 
     .metric-title {
-        font-size: 1rem;
+        font-size: 0.85rem;
         color: var(--gray);
         font-weight: 500;
     }
 
     .metric-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
         background-color: var(--primary-light);
         color: var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 0.9rem;
     }
 
     .metric-value {
-        font-size: 2rem;
-        font-weight: 700;
+        font-size: 1.5rem;
+        font-weight: 600;
         color: var(--dark);
-        margin: 0.5rem 0;
+        margin: 0.25rem 0;
     }
 
     .metric-change {
-        font-size: 0.85rem;
-        color: var(--gray);
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
     }
 
-    .positive {
-        color: var(--success);
-    }
+    .positive { color: var(--success); }
+    .negative { color: var(--danger); }
+    .neutral { color: var(--gray); }
 
-    .quick-actions {
-        margin-top: 2rem;
+    /* Combined Charts Section */
+    .analytics-section {
+        margin: 1.5rem 0;
     }
 
     .section-title {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         font-weight: 600;
         color: var(--dark);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
 
-    .action-grid {
+    .section-title i {
+        color: var(--primary);
+    }
+
+    .charts-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
     }
 
-    .action-card {
+    @media (max-width: 768px) {
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-card {
         background: white;
         border-radius: var(--border-radius);
         box-shadow: var(--box-shadow);
-        padding: 1.5rem;
-        transition: var(--transition);
-        text-align: center;
-        color: var(--dark);
-        text-decoration: none;
+        padding: 1rem;
+        height: 280px;
     }
 
-    .action-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        color: var(--primary);
-    }
-
-    .action-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: var(--primary);
-    }
-
-    .action-title {
+    .chart-title {
+        font-size: 0.95rem;
         font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
     }
 
-    /* Recent Activity Section */
-    .recent-activity {
-        margin-top: 3rem;
+    /* Compact Activity Section */
+    .activity-section {
+        margin: 1.5rem 0;
+    }
+
+    .activity-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1rem;
     }
 
     .activity-list {
-        background: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        overflow: hidden;
+        max-height: 300px;
+        overflow-y: auto;
     }
 
     .activity-item {
-        padding: 1.25rem 1.5rem;
+        padding: 0.75rem 0;
         border-bottom: 1px solid var(--light-gray);
         display: flex;
-        align-items: center;
+        gap: 0.75rem;
     }
 
     .activity-item:last-child {
@@ -172,50 +189,86 @@
     }
 
     .activity-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: var(--light);
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background-color: var(--primary-light);
         color: var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 1rem;
         flex-shrink: 0;
+        font-size: 0.9rem;
     }
 
-    .activity-details {
+    .activity-content {
         flex: 1;
     }
 
     .activity-title {
+        font-size: 0.9rem;
         font-weight: 500;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.15rem;
     }
 
     .activity-time {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         color: var(--gray);
     }
 
+    /* Compact Import Section */
+    .import-section {
+        margin-top: 1.5rem;
+    }
+
+    .import-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1rem;
+    }
+
+    .import-options {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .import-btn {
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+        background-color: var(--primary-light);
+        color: var(--primary);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: var(--transition);
+        border: 1px solid rgba(58, 86, 180, 0.2);
+    }
+
+    .import-btn:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+
     /* Responsive Adjustments */
-    @media (max-width: 768px) {
+    @media (max-width: 576px) {
         .dashboard-container {
             padding: 1rem;
         }
         
         .metrics-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .action-grid {
             grid-template-columns: 1fr 1fr;
         }
-    }
-
-    @media (max-width: 480px) {
-        .action-grid {
-            grid-template-columns: 1fr;
+        
+        .metric-value {
+            font-size: 1.25rem;
+        }
+        
+        .import-options {
+            flex-direction: column;
         }
     }
 </style>
@@ -224,11 +277,11 @@
     <div class="dashboard-header">
         <h1 class="dashboard-title">
             <i class="fas fa-tachometer-alt"></i>
-            Dashboard Overview
+            Asset Dashboard
         </h1>
     </div>
 
-    <!-- Metrics Section -->
+    <!-- Compact Metrics Section -->
     <div class="metrics-grid">
         <div class="metric-card">
             <div class="metric-header">
@@ -237,140 +290,285 @@
                     <i class="fas fa-boxes"></i>
                 </div>
             </div>
-            <div class="metric-value">{{ total_assets }}</div>
+            <div class="metric-value">{{ total_assets|intcomma }}</div>
             <div class="metric-change positive">
-                <i class="fas fa-arrow-up"></i> 12% from last month
+                <i class="fas fa-arrow-up"></i> 12%
             </div>
         </div>
 
         <div class="metric-card">
             <div class="metric-header">
-                <h3 class="metric-title">Assigned Assets</h3>
+                <h3 class="metric-title">Assigned</h3>
                 <div class="metric-icon">
                     <i class="fas fa-laptop"></i>
                 </div>
             </div>
-            <div class="metric-value">{{ assigned_assets }}</div>
+            <div class="metric-value">{{ allocated_assets|intcomma }}</div>
             <div class="metric-change positive">
-                <i class="fas fa-arrow-up"></i> 8% from last month
+                <i class="fas fa-arrow-up"></i> 8%
             </div>
         </div>
 
         <div class="metric-card">
             <div class="metric-header">
-                <h3 class="metric-title">Available Assets</h3>
+                <h3 class="metric-title">Available</h3>
                 <div class="metric-icon">
                     <i class="fas fa-check-circle"></i>
                 </div>
             </div>
-           
-            <div class="metric-change">
+            <div class="metric-value">{{ unallocated_assets|intcomma }}</div>
+            <div class="metric-change neutral">
                 <i class="fas fa-equals"></i> Steady
             </div>
         </div>
 
         <div class="metric-card">
             <div class="metric-header">
-                <h3 class="metric-title">Total Employees</h3>
+                <h3 class="metric-title">Employees</h3>
                 <div class="metric-icon">
                     <i class="fas fa-users"></i>
                 </div>
             </div>
-            <div class="metric-value">{{ total_employees }}</div>
+            <div class="metric-value">{{ total_employees|intcomma }}</div>
             <div class="metric-change positive">
-                <i class="fas fa-arrow-up"></i> 5% from last month
+                <i class="fas fa-arrow-up"></i> 5%
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions Section -->
-    <div class="quick-actions">
+    <!-- Combined Analytics Section -->
+    <div class="analytics-section">
         <h2 class="section-title">
-            <i class="fas fa-bolt"></i>
-            Quick Actions
+            <i class="fas fa-chart-pie"></i>
+            Asset Analytics
         </h2>
-        <div class="action-grid">
-            <a href="{% url 'add_asset' %}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-plus"></i>
-                </div>
-                <h3 class="action-title">Add Asset</h3>
-            </a>
-
-            <a href="{% url 'add_employee' %}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <h3 class="action-title">Add Employee</h3>
-            </a>
-
-            <a href="{% url 'asset_report' %}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <h3 class="action-title">View Reports</h3>
-            </a>
-
-            <a href="{% url 'asset_allocation_form' %}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-hand-holding"></i>
-                </div>
-                <h3 class="action-title">Allocate Asset</h3>
-            </a>
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3 class="chart-title">Assets by Type</h3>
+                <canvas id="assetTypeChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Allocation Status</h3>
+                <canvas id="allocationChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <!-- Recent Activity Section -->
-    <div class="recent-activity">
+
+    <!-- Compact Import Section -->
+    <div class="import-section">
         <h2 class="section-title">
-            <i class="fas fa-history"></i>
-            Recent Activity
+            <i class="fas fa-file-import"></i>
+            Bulk Import
         </h2>
-        <div class="activity-list">
-            <div class="activity-item">
-                <div class="activity-icon">
+        <div class="import-card">
+            <p style="font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--gray);">
+                Import multiple assets or employees at once using our templates.
+            </p>
+            <div class="import-options">
+                <a href="{% url 'mass_upload' %}" class="import-btn">
                     <i class="fas fa-laptop"></i>
-                </div>
-                <div class="activity-details">
-                    <div class="activity-title">MacBook Pro assigned to John Doe</div>
-                    <div class="activity-time">2 hours ago</div>
-                </div>
-            </div>
-            <div class="activity-item">
-                <div class="activity-icon">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <div class="activity-details">
-                    <div class="activity-title">New employee Jane Smith added</div>
-                    <div class="activity-time">5 hours ago</div>
-                </div>
-            </div>
-            <div class="activity-item">
-                <div class="activity-icon">
-                    <i class="fas fa-undo"></i>
-                </div>
-                <div class="activity-details">
-                    <div class="activity-title">iPad returned by Michael Brown</div>
-                    <div class="activity-time">Yesterday</div>
-                </div>
-            </div>
-            <div class="activity-item">
-                <div class="activity-icon">
-                    <i class="fas fa-print"></i>
-                </div>
-                <div class="activity-details">
-                    <div class="activity-title">Asset report generated</div>
-                    <div class="activity-time">2 days ago</div>
-                </div>
+                    Mass Upload
+                </a>
+                
             </div>
         </div>
     </div>
 </div>
 
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Add any necessary JavaScript here
-    function redirectToHome() {
-        window.location.href = '{% url "home" %}';
-    }
+    // Asset Type Chart - Compact Version
+    const assetTypeCtx = document.getElementById('assetTypeChart').getContext('2d');
+    new Chart(assetTypeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Laptops', 'Desktops', 'Mobile', 'Tablets', 'Printers', 'Other'],
+            datasets: [{
+                data: [{{ laptop_count }}, {{ desktop_count }}, {{ mobile_count }}, 
+                       {{ tablet_count }}, {{ printer_count }}, {{ other_count }}],
+                backgroundColor: [
+                    '#3a56b4',
+                    '#4c7bff',
+                    '#6c8dfa',
+                    '#8ea6fb',
+                    '#b1c0fd',
+                    '#d3dbfe'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 16,
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // Allocation Status Chart - Compact Version
+    const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+    new Chart(allocationCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Allocated', 'Available', 'Maintenance', 'Disposed'],
+            datasets: [{
+                data: [{{ assigned_assets }}, {{ available_assets }}, 
+                       {{ maintenance_count }}, {{ disposed_count }}],
+                backgroundColor: '#3a56b4',
+                borderRadius: 4,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    <!-- In your template, after including Chart.js -->
+    document.addEventListener('DOMContentLoaded', function() {
+        // Asset Type Chart
+        const assetTypeCtx = document.getElementById('assetTypeChart');
+        if (assetTypeCtx) {
+            new Chart(assetTypeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Laptops', 'Desktops', 'Mobile', 'Tablets', 'Printers', 'Other'],
+                    datasets: [{
+                        data: [
+                            {{ laptop_count|default:0 }}, 
+                            {{ desktop_count|default:0 }}, 
+                            {{ mobile_count|default:0 }},
+                            {{ tablet_count|default:0 }}, 
+                            {{ printer_count|default:0 }}, 
+                            {{ other_count|default:0 }}
+                        ],
+                        backgroundColor: [
+                            '#3a56b4',
+                            '#4c7bff',
+                            '#6c8dfa',
+                            '#8ea6fb',
+                            '#b1c0fd',
+                            '#d3dbfe'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 16,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Allocation Status Chart
+        const allocationCtx = document.getElementById('allocationChart');
+        if (allocationCtx) {
+            new Chart(allocationCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Allocated', 'Available', 'Maintenance', 'Disposed'],
+                    datasets: [{
+                        data: [
+                            {{ assigned_assets|default:0 }}, 
+                            {{ available_assets|default:0 }},
+                            {{ maintenance_count|default:0 }}, 
+                            {{ disposed_count|default:0 }}
+                        ],
+                        backgroundColor: '#3a56b4',
+                        borderRadius: 4,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    });
+
 </script>
 {% endblock %}

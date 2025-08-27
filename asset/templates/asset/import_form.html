@@ -1,0 +1,52 @@
+{% extends 'asset/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{{ title }}</h6>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="custom-file">
+                        {{ form.file }}
+                        <label class="custom-file-label" for="{{ form.file.id_for_label }}">
+                            Choose Excel file...
+                        </label>
+                    </div>
+                    
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-upload mr-2"></i>Upload
+                </button>
+                <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </form>
+            
+            <div class="mt-4">
+                <h5>Import Instructions:</h5>
+                <ol>
+                    <li>Download the template file</li>
+                    <li>Fill in your data keeping the column headers</li>
+                    <li>Save the file as Excel (.xlsx) format</li>
+                    <li>Upload using the form above</li>
+                </ol>
+                <div class="alert alert-info">
+                    <strong>Note:</strong> The first row should contain column headers.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Update file input label
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+</script>
+{% endblock %}
+

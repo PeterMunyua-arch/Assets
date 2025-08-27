@@ -1,0 +1,161 @@
+{% extends 'asset/base.html' %}
+{% load static %}
+
+{% block title %}Reports Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0">
+                    <h6>Reports Dashboard</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Assets</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_assets }}</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-laptop fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Allocated Assets</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ allocated_assets }}</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Unallocated Assets</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ unallocated_assets }}</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>Available Reports</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Total Assets Report</h5>
+                                                    <p class="card-text">Complete inventory of all assets in the system</p>
+                                                    <a href="{% url 'asset_report' 'total_assets' %}?format=excel" class="btn btn-primary">
+                                                        <i class="fas fa-download"></i> Download Excel
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Allocated Assets Report</h5>
+                                                    <p class="card-text">Assets currently assigned to employees</p>
+                                                    <a href="{% url 'asset_report' 'allocated_assets' %}?format=excel" class="btn btn-primary">
+                                                        <i class="fas fa-download"></i> Download Excel
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Unallocated Assets Report</h5>
+                                                    <p class="card-text">Assets available for assignment</p>
+                                                    <a href="{% url 'asset_report' 'unallocated_assets' %}?format=excel" class="btn btn-primary">
+                                                        <i class="fas fa-download"></i> Download Excel
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Assets by Status</h5>
+                                                    <p class="card-text">Assets grouped by their status (New, Old, Damaged)</p>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-primary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fas fa-download"></i> Download by Status
+                                                        </button>
+                                                        <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_status' %}?format=excel">All Statuses</a></li>
+                                                            {% for status_key, status_name in status_choices %}
+                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_status' %}?status={{ status_key }}&format=excel">{{ status_name }}</a></li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Assets by Department</h5>
+                                                    <p class="card-text">Assets grouped by employee department</p>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-primary dropdown-toggle" type="button" id="deptDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="fas fa-download"></i> Download by Department
+                                                        </button>
+                                                        <ul class="dropdown-menu" aria-labelledby="deptDropdown">
+                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_department' %}?format=excel">All Departments</a></li>
+                                                            {% for department in departments %}
+                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_department' %}?department={{ department }}&format=excel">{{ department }}</a></li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

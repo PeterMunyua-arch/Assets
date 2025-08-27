@@ -1,295 +1,641 @@
 {% extends 'asset/base.html' %}
-{% block title %}Asset Details - {{ asset_allocation.asset.name }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="card asset-detail-card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <i class="fas fa-laptop text-primary mr-2"></i>
-                Asset Details
+<style>
+    :root {
+        --primary: #3a56b4;
+        --primary-light: #e8edff;
+        --primary-dark: #2c4293;
+        --success: #4caf50;
+        --danger: #f44336;
+        --warning: #ff9800;
+        --info: #2196f3;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border-radius: 8px;
+        --border-radius-sm: 6px;
+        --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        --box-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.2s ease;
+    }
+
+    .asset-details-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .asset-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .asset-title {
+        font-size: 1.75rem;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0.5rem;
+    }
+
+    .asset-title i {
+        color: var(--primary);
+    }
+
+    .asset-meta {
+        color: var(--gray);
+        font-size: 0.9rem;
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .details-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: none;
+        height: fit-content;
+    }
+
+    .card-header {
+        padding: 1rem 1.5rem;
+        background-color: var(--primary-light);
+        border-bottom: 1px solid var(--light-gray);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: var(--primary);
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .property-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .property {
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+
+    .property:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .property-label {
+        font-size: 0.8rem;
+        color: var(--gray);
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .property-value {
+        font-size: 1rem;
+        color: var(--dark);
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .property-value.empty {
+        color: var(--gray);
+        font-style: italic;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-badge.available {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: var(--success);
+    }
+
+    .status-badge.allocated {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: var(--danger);
+    }
+
+    .status-badge.secondary {
+        background-color: rgba(108, 117, 125, 0.1);
+        color: var(--gray);
+    }
+
+    .asset-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        border: none;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(58, 86, 180, 0.2);
+    }
+
+    .btn-danger {
+        background-color: var(--danger);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #dc3545;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+    }
+
+    .btn-warning {
+        background-color: var(--warning);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #e68a00;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+    }
+
+    .current-allocation {
+        background-color: var(--primary-light);
+        border-left: 4px solid var(--primary);
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .current-allocation i {
+        color: var(--primary);
+        font-size: 1.25rem;
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .history-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        color: var(--dark);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--light-gray);
+    }
+
+    .section-title i {
+        color: var(--primary);
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .history-table th {
+        text-align: left;
+        padding: 0.75rem;
+        background-color: var(--primary-light);
+        color: var(--primary);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .history-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--light-gray);
+        vertical-align: middle;
+    }
+
+    .history-table tr:hover td {
+        background-color: rgba(58, 86, 180, 0.03);
+    }
+
+    .no-data {
+        text-align: center;
+        color: var(--gray);
+        padding: 1.5rem;
+        font-style: italic;
+    }
+
+    .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    @media (max-width: 1024px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .asset-details-container {
+            padding: 0 1rem;
+        }
+        
+        .asset-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .asset-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .property-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .history-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .asset-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .specs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="asset-details-container">
+    <div class="asset-header">
+        <div>
+            <h2 class="asset-title">
+                <i class="fas fa-laptop"></i> {{ asset.name }}
             </h2>
-            <div class="card-actions">
-                <a href="{% url 'asset_report' %}" class="btn btn-outline">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Back to Assets
-                </a>
-                <button onclick="window.print()" class="btn btn-primary">
-                    <i class="fas fa-print mr-2"></i>
-                    Print Record
-                </button>
+            <div class="asset-meta">
+                <span class="meta-item">
+                    <i class="fas fa-hashtag"></i> Serial: <strong>{{ asset.serial_number }}</strong>
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-tag"></i> Type: <strong>{{ asset.get_type_display }}</strong>
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-building"></i> Company: <strong>{{ asset.company.name }}</strong>
+                </span>
+                <span class="meta-item">
+                    Status: 
+                    {% if asset.is_returned %}
+                        <span class="status-badge available">
+                            <i class="fas fa-check-circle"></i> Available
+                        </span>
+                    {% elif asset.is_allocated %}
+                        <span class="status-badge allocated">
+                            <i class="fas fa-user"></i> Allocated
+                        </span>
+                    {% else %}
+                        <span class="status-badge secondary">
+                            <i class="fas fa-question-circle"></i> Unknown
+                        </span>
+                    {% endif %}
+                </span>
             </div>
         </div>
         
-        <div class="card-body">
-            <div class="asset-detail-grid">
-                <!-- Asset Information Section -->
-                <div class="detail-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-info-circle text-primary mr-2"></i>
-                        Asset Information
-                    </h3>
-                    <div class="detail-item">
-                        <span class="detail-label">Asset Name:</span>
-                        <span class="detail-value">{{ asset_allocation.asset.name }}</span>
+        <div class="asset-actions">
+            {% if asset.is_allocated and not asset.is_returned %}
+                <a href="{% url 'asset_return_form' %}?asset={{ asset.id }}" class="btn btn-danger">
+
+                    <i class="fas fa-undo"></i> Return Asset
+                </a>
+            {% elif asset.is_returned or not asset.is_allocated %}
+                <a href="{% url 'asset_allocation_form' %}?asset={{ asset.id }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Allocate Asset
+                </a>
+            {% endif %}
+    
+        </div>
+    </div>
+
+    {% if asset.is_allocated and current_allocation %}
+    <div class="current-allocation">
+        <i class="fas fa-info-circle"></i>
+        <div class="alert-content">
+            <strong>Currently allocated to:</strong> {{ current_allocation.employee_allocated }} 
+            since {{ current_allocation.allocation_date|date:"M j, Y" }}
+            {% if current_allocation.asset_status %}
+                (Status: {{ current_allocation.get_asset_status_display }})
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="details-grid">
+        <!-- Basic Information Card -->
+        <div class="details-card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Basic Information
+            </div>
+            <div class="card-body">
+                <div class="property-grid">
+                    <div class="property">
+                        <span class="property-label">Asset Name</span>
+                        <span class="property-value">{{ asset.name|default:"Not specified" }}</span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Serial Number:</span>
-                        <span class="detail-value">{{ asset_allocation.asset.serial_number }}</span>
+                    <div class="property">
+                        <span class="property-label">Model</span>
+                        <span class="property-value">{{ asset.model|default:"Not specified" }}</span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Company:</span>
-                        <span class="detail-value">{{ asset_allocation.asset.company }}</span>
+                    <div class="property">
+                        <span class="property-label">Type</span>
+                        <span class="property-value">{{ asset.get_type_display|default:"Not specified" }}</span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Status:</span>
-                        <span class="badge badge-{% if asset_allocation.asset_status == 'Allocated' %}allocated{% else %}available{% endif %}">
-                            {{ asset_allocation.asset_status }}
+                    <div class="property">
+                        <span class="property-label">Serial Number</span>
+                        <span class="property-value">{{ asset.serial_number }}</span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">IMEI Number</span>
+                        <span class="property-value {% if not asset.imei_number %}empty{% endif %}">
+                            {{ asset.imei_number|default:"Not specified" }}
+                        </span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Company</span>
+                        <span class="property-value">{{ asset.company.name }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hardware Specifications Card -->
+        <div class="details-card">
+            <div class="card-header">
+                <i class="fas fa-microchip"></i> Hardware Specifications
+            </div>
+            <div class="card-body">
+                <div class="property-grid">
+                    <div class="property">
+                        <span class="property-label">Processor</span>
+                        <span class="property-value">{{ asset.get_processor_display|default:"Not specified" }}</span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Processor Cores</span>
+                        <span class="property-value {% if not asset.processor_cores %}empty{% endif %}">
+                            {{ asset.processor_cores|default:"Not specified" }}
+                        </span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">RAM</span>
+                        <span class="property-value">{{ asset.get_ram_display|default:"Not specified" }}</span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Storage Type</span>
+                        <span class="property-value">{{ asset.get_storage_type_display|default:"Not specified" }}</span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Storage Capacity</span>
+                        <span class="property-value {% if not asset.storage_capacity %}empty{% endif %}">
+                            {{ asset.storage_capacity|default:"Not specified" }}
+                        </span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">SSD Capacity</span>
+                        <span class="property-value {% if not asset.ssd_capacity %}empty{% endif %}">
+                            {{ asset.ssd_capacity|default:"Not specified" }}
+                        </span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">HDD Capacity</span>
+                        <span class="property-value {% if not asset.hdd_capacity %}empty{% endif %}">
+                            {{ asset.hdd_capacity|default:"Not specified" }}
                         </span>
                     </div>
                 </div>
-                
-                <!-- Allocation Details Section -->
-                <div class="detail-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-user-check text-primary mr-2"></i>
-                        Allocation Details
-                    </h3>
-                    <div class="detail-item">
-                        <span class="detail-label">Assigned To:</span>
-                        <div class="employee-detail">
-                            <div class="employee-avatar">
-                                {{ asset_allocation.employee_allocated.first_name|first }}{{ asset_allocation.employee_allocated.last_name|first }}
-                            </div>
-                            <div>
-                                <div class="employee-name">{{ asset_allocation.employee_allocated.get_full_name }}</div>
-                                <div class="employee-position">{{ asset_allocation.employee_allocated.position }}</div>
-                            </div>
-                        </div>
+            </div>
+        </div>
+
+        <!-- Software Information Card -->
+        <div class="details-card">
+            <div class="card-header">
+                <i class="fas fa-code"></i> Software Information
+            </div>
+            <div class="card-body">
+                <div class="property-grid">
+                    <div class="property">
+                        <span class="property-label">Operating System</span>
+                        <span class="property-value">{{ asset.get_os_display|default:"Not specified" }}</span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Assign Date:</span>
-                        <span class="detail-value">{{ asset_allocation.allocation_date|date:"M d, Y" }}</span>
+                    <div class="property">
+                        <span class="property-label">OS License</span>
+                        <span class="property-value {% if not asset.os_licence %}empty{% endif %}">
+                            {{ asset.os_licence|default:"Not specified" }}
+                        </span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Return Date:</span>
-                        <span class="detail-value">
-                            {% if asset_allocation.return_date %}
-                                {{ asset_allocation.return_date|date:"M d, Y" }}
-                            {% else %}
-                                <span class="text-muted">Not returned</span>
-                            {% endif %}
+                    <div class="property">
+                        <span class="property-label">Office Version</span>
+                        <span class="property-value">{{ asset.get_office_display|default:"Not specified" }}</span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Office License</span>
+                        <span class="property-value {% if not asset.office_licence %}empty{% endif %}">
+                            {{ asset.office_licence|default:"Not specified" }}
                         </span>
                     </div>
                 </div>
-                
-                <!-- Signature Section -->
-                <div class="detail-section signature-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-signature text-primary mr-2"></i>
-                        Signatures
-                    </h3>
-                    <div class="signature-container">
-                        <div class="signature-item">
-                            <div class="signature-line"></div>
-                            <div class="signature-label">IT Manager's Signature</div>
-                        </div>
-                        <div class="signature-item">
-                            <div class="signature-line"></div>
-                            <div class="signature-label">Employee's Signature</div>
-                        </div>
+            </div>
+        </div>
+
+        <!-- Purchase Information Card -->
+        <div class="details-card">
+            <div class="card-header">
+                <i class="fas fa-shopping-cart"></i> Purchase Information
+            </div>
+            <div class="card-body">
+                <div class="property-grid">
+                    <div class="property">
+                        <span class="property-label">Purchase Date</span>
+                        <span class="property-value">{{ asset.purchase_date|date:"M j, Y"|default:"Not specified" }}</span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Purchase Price</span>
+                        <span class="property-value {% if not asset.purchase_price %}empty{% endif %}">
+                            {% if asset.purchase_price %}Ksh {{ asset.purchase_price }}{% else %}Not specified{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information Card -->
+        <div class="details-card">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Additional Information
+            </div>
+            <div class="card-body">
+                <div class="property-grid">
+                    <div class="property">
+                        <span class="property-label">IP Address</span>
+                        <span class="property-value {% if not asset.ip %}empty{% endif %}">
+                            {{ asset.ip|default:"Not specified" }}
+                        </span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Accessories</span>
+                        <span class="property-value {% if not asset.accessories %}empty{% endif %}">
+                            {{ asset.accessories|default:"Not specified" }}
+                        </span>
+                    </div>
+                    <div class="property">
+                        <span class="property-label">Specifications</span>
+                        <span class="property-value {% if not asset.specs %}empty{% endif %}">
+                            {{ asset.specs|default:"Not specified" }}
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    /* Asset Detail Specific Styles */
-    .asset-detail-card {
-        max-width: 1000px;
-        margin: 0 auto;
-    }
-    
-    .asset-detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-    
-    .detail-section {
-        background: white;
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        margin-bottom: 1.5rem;
-    }
-    
-    .section-title {
-        font-size: 1.25rem;
-        color: var(--primary);
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--light-gray);
-        display: flex;
-        align-items: center;
-    }
-    
-    .detail-item {
-        display: flex;
-        margin-bottom: 1rem;
-        align-items: flex-start;
-    }
-    
-    .detail-label {
-        font-weight: 500;
-        color: var(--dark);
-        min-width: 120px;
-        margin-right: 1rem;
-    }
-    
-    .detail-value {
-        flex: 1;
-        color: var(--dark);
-    }
-    
-    /* Employee Detail */
-    .employee-detail {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    
-    .employee-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: var(--primary);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        flex-shrink: 0;
-    }
-    
-    .employee-name {
-        font-weight: 500;
-    }
-    
-    .employee-position {
-        font-size: 0.85rem;
-        color: var(--gray);
-    }
-    
-    /* Badges */
-    .badge {
-        display: inline-block;
-        padding: 0.35em 0.65em;
-        font-size: 0.75em;
-        font-weight: 600;
-        line-height: 1;
-        text-align: center;
-        white-space: nowrap;
-        vertical-align: baseline;
-        border-radius: 50rem;
-    }
-    
-    .badge-allocated {
-        background-color: rgba(74, 201, 240, 0.1);
-        color: var(--success);
-    }
-    
-    .badge-available {
-        background-color: rgba(40, 167, 69, 0.1);
-        color: #28a745;
-    }
-    
-    /* Signature Section */
-    .signature-section {
-        grid-column: span 2;
-    }
-    
-    .signature-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        margin-top: 1.5rem;
-    }
-    
-    .signature-item {
-        text-align: center;
-    }
-    
-    .signature-line {
-        height: 1px;
-        background-color: var(--dark);
-        margin-bottom: 0.5rem;
-        position: relative;
-        padding-top: 60px;
-    }
-    
-    .signature-line:after {
-        content: "";
-        position: absolute;
-        top: 30px;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background-color: var(--dark);
-    }
-    
-    .signature-label {
-        font-size: 0.9rem;
-        color: var(--gray);
-    }
-    
-    /* Print Styles */
-    @media print {
-        .sidebar, .header, .card-actions {
-            display: none !important;
-        }
-        
-        .card {
-            border: none;
-            box-shadow: none;
-        }
-        
-        .asset-detail-grid {
-            grid-template-columns: 1fr 1fr !important;
-        }
-        
-        .detail-section {
-            box-shadow: none !important;
-            border: 1px solid #ddd !important;
-            page-break-inside: avoid;
-        }
-    }
-    
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-        .asset-detail-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .signature-section {
-            grid-column: span 1;
-        }
-        
-        .signature-container {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-        
-        .card-actions {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .card-actions .btn {
-            width: 100%;
-        }
-    }
-</style>
+    <div class="history-section">
+        <h3 class="section-title">
+            <i class="fas fa-history"></i> Allocation History
+        </h3>
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Allocation Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for allocation in allocations %}
+                    <tr>
+                        <td>{{ allocation.employee_allocated }}</td>
+                        <td>{{ allocation.allocation_date|date:"M j, Y" }}</td>
+                        <td>{{ allocation.return_date|date:"M j, Y"|default:"-" }}</td>
+                        <td>
+                            <span class="status-badge {{ allocation.asset_status }}">
+                                {{ allocation.get_asset_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="no-data">No allocation history found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3 class="section-title">
+            <i class="fas fa-exchange-alt"></i> Return History
+        </h3>
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for return in returns %}
+                    <tr>
+                        <td>{{ return.employee_returning }}</td>
+                        <td>{{ return.return_date|date:"M j, Y" }}</td>
+                        <td>
+                            <span class="status-badge {{ return.asset_status }}">
+                                {{ return.get_asset_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="no-data">No return history found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

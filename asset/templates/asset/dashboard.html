@@ -1,0 +1,748 @@
+{% extends 'asset/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Asset Reports Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #3a56b4;
+        --primary-light: #e8edff;
+        --primary-dark: #2c4293;
+        --success: #4caf50;
+        --danger: #f44336;
+        --warning: #ff9800;
+        --info: #2196f3;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border-radius: 8px;
+        --border-radius-sm: 6px;
+        --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        --box-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.2s ease;
+    }
+
+    .reports-dashboard {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+
+    .dashboard-title i {
+        color: var(--primary);
+    }
+
+    .export-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .export-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.6rem 1.25rem;
+        background-color: var(--primary);
+        color: white;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .export-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(58, 86, 180, 0.2);
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        background: white;
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--box-shadow-md);
+        padding: 0.5rem 0;
+        min-width: 160px;
+        z-index: 100;
+        display: none;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: var(--dark);
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.9rem;
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+    }
+
+    /* Report Cards Section */
+    .report-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .report-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.5rem;
+        transition: var(--transition);
+        border-left: 4px solid var(--primary);
+    }
+
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow-md);
+    }
+
+    .report-card.primary {
+        border-left-color: var(--primary);
+    }
+
+    .report-card.success {
+        border-left-color: var(--success);
+    }
+
+    .report-card.info {
+        border-left-color: var(--info);
+    }
+    
+    .report-card.warning {
+        border-left-color: var(--warning);
+    }
+
+    .report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .report-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--gray);
+        font-weight: 600;
+    }
+
+    .report-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-light);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .report-card.success .report-icon {
+        background-color: rgba(76, 175, 80, 0.1);
+        color: var(--success);
+    }
+    
+    .report-card.info .report-icon {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: var(--info);
+    }
+    
+    .report-card.warning .report-icon {
+        background-color: rgba(255, 152, 0, 0.1);
+        color: var(--warning);
+    }
+
+    .report-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0.5rem 0;
+    }
+
+    .report-footer {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(58, 86, 180, 0.2);
+    }
+
+    .btn-success {
+        background-color: var(--success);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #3d8b40;
+        transform: translateY(-1px);
+    }
+
+    .btn-info {
+        background-color: var(--info);
+        color: white;
+    }
+
+    .btn-info:hover {
+        background-color: #0d7dd8;
+        transform: translateY(-1px);
+    }
+    
+    .btn-warning {
+        background-color: var(--warning);
+        color: white;
+    }
+    
+    .btn-warning:hover {
+        background-color: #e68900;
+        transform: translateY(-1px);
+    }
+
+    /* Detailed Reports Section */
+    .detailed-reports {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        color: var(--primary);
+    }
+
+    .report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .type-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.5rem;
+        transition: var(--transition);
+        border: 1px solid var(--light-gray);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .type-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--box-shadow-md);
+        border-color: var(--primary-light);
+    }
+
+    .type-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+    }
+
+    .type-card.success .type-icon {
+        color: var(--success);
+    }
+
+    .type-card.info .type-icon {
+        color: var(--info);
+    }
+    
+    .type-card.warning .type-icon {
+        color: var(--warning);
+    }
+
+    .type-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+        font-size: 1.1rem;
+    }
+
+    .type-description {
+        color: var(--gray);
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        flex-grow: 1;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--light-gray);
+        color: var(--dark);
+    }
+
+    .btn-outline:hover {
+        background-color: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline.success {
+        border-color: rgba(76, 175, 80, 0.3);
+        color: var(--success);
+    }
+
+    .btn-outline.success:hover {
+        background-color: rgba(76, 175, 80, 0.1);
+        border-color: var(--success);
+    }
+
+    .btn-outline.info {
+        border-color: rgba(33, 150, 243, 0.3);
+        color: var(--info);
+    }
+
+    .btn-outline.info:hover {
+        background-color: rgba(33, 150, 243, 0.1);
+        border-color: var(--info);
+    }
+    
+    .btn-outline.warning {
+        border-color: rgba(255, 152, 0, 0.3);
+        color: var(--warning);
+    }
+    
+    .btn-outline.warning:hover {
+        background-color: rgba(255, 152, 0, 0.1);
+        border-color: var(--warning);
+    }
+    
+    /* Dropdown styles for reports */
+    .report-dropdown {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .report-dropdown-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        transition: var(--transition);
+        border: 1px solid var(--light-gray);
+        background-color: white;
+        color: var(--dark);
+        cursor: pointer;
+    }
+    
+    .report-dropdown-btn:hover {
+        background-color: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    
+    .report-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--box-shadow-md);
+        padding: 0.5rem 0;
+        z-index: 100;
+        display: none;
+        margin-top: 5px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .report-dropdown-menu.show {
+        display: block;
+    }
+    
+    .report-dropdown-item {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: var(--dark);
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.9rem;
+    }
+    
+    .report-dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+    }
+    
+    .card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .reports-dashboard {
+            padding: 1rem;
+        }
+        
+        .report-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .report-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .report-footer {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="reports-dashboard">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-chart-pie"></i>
+            Asset Reports Dashboard
+        </h1>
+        <div class="export-dropdown">
+            <button class="export-btn" onclick="toggleDropdown()">
+                <i class="fas fa-download"></i>
+                <span>Export All Reports</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu" id="exportDropdown">
+                <a class="dropdown-item" href="#">
+                    <i class="fas fa-file-csv"></i> CSV Format
+                </a>
+                <a class="dropdown-item" href="#">
+                    <i class="fas fa-file-excel"></i> Excel Format
+                </a>
+                <a class="dropdown-item" href="#">
+                    <i class="fas fa-file-pdf"></i> PDF Format
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Cards Section -->
+    <div class="report-cards">
+        <div class="report-card primary">
+            <div class="report-header">
+                <div class="report-title">Total Assets</div>
+                <div class="report-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+            </div>
+            <div class="report-value">{{ total_assets|intcomma }}</div>
+            <div class="report-footer">
+                <a href="{% url 'asset_report' 'total_assets' %}?format=excel" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Download Excel
+                </a>
+                <a href="{% url 'all_assets_report' %}" class="btn btn-outline">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+
+        <div class="report-card success">
+            <div class="report-header">
+                <div class="report-title">Allocated Assets</div>
+                <div class="report-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <div class="report-value">{{ allocated_assets|intcomma }}</div>
+            <div class="report-footer">
+                <a href="{% url 'asset_report' 'allocated_assets' %}?format=excel" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download Excel
+                </a>
+                <a href="{% url 'allocated_assets_report' %}" class="btn btn-outline success">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+
+        <div class="report-card info">
+            <div class="report-header">
+                <div class="report-title">Unallocated Assets</div>
+                <div class="report-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+            </div>
+            <div class="report-value">{{ unallocated_assets|intcomma }}</div>
+            <div class="report-footer">
+                <a href="{% url 'asset_report' 'unallocated_assets' %}?format=excel" class="btn btn-info">
+                    <i class="fas fa-download"></i> Download Excel
+                </a>
+                <a href="{% url 'unallocated_assets_report' %}" class="btn btn-outline info">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+        
+        <div class="report-card warning">
+            <div class="report-header">
+                <div class="report-title">Departments</div>
+                <div class="report-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+            </div>
+            <div class="report-value">{{ departments.count|intcomma }}</div>
+            <div class="report-footer">
+                <div class="report-dropdown">
+                    <button class="report-dropdown-btn" onclick="toggleReportDropdown('deptDropdown')">
+                        <i class="fas fa-download"></i> Download by Department
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="report-dropdown-menu" id="deptDropdown">
+                        <a class="report-dropdown-item" href="{% url 'asset_report' 'by_department' %}?format=excel">
+                            <i class="fas fa-download"></i> All Departments
+                        </a>
+                        {% for department in departments %}
+                        <a class="report-dropdown-item" href="{% url 'asset_report' 'by_department' %}?department={{ department }}&format=excel">
+                            <i class="fas fa-file-excel"></i> {{ department }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Reports Section -->
+    <div class="detailed-reports">
+        <h2 class="section-title">
+            <i class="fas fa-file-alt"></i>
+            Available Reports
+        </h2>
+        <div class="report-grid">
+            <!-- Total Assets Report -->
+            <div class="type-card">
+                <div class="type-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <h3 class="type-title">Total Assets Report</h3>
+                <p class="type-description">Complete inventory of all assets in the system</p>
+                <div class="card-actions">
+                    <a href="{% url 'asset_report' 'total_assets' %}?format=excel" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download Excel
+                    </a>
+                    <a href="{% url 'all_assets_report' %}" class="btn btn-outline">
+                        <i class="fas fa-eye"></i> View Report
+                    </a>
+                </div>
+            </div>
+
+            <!-- Allocated Assets Report -->
+            <div class="type-card success">
+                <div class="type-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="type-title">Allocated Assets Report</h3>
+                <p class="type-description">Assets currently assigned to employees</p>
+                <div class="card-actions">
+                    <a href="{% url 'asset_report' 'allocated_assets' %}?format=excel" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download Excel
+                    </a>
+                    <a href="{% url 'allocated_assets_report' %}" class="btn btn-outline success">
+                        <i class="fas fa-eye"></i> View Report
+                    </a>
+                </div>
+            </div>
+
+            <!-- Unallocated Assets Report -->
+            <div class="type-card info">
+                <div class="type-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h3 class="type-title">Unallocated Assets Report</h3>
+                <p class="type-description">Assets available for assignment</p>
+                <div class="card-actions">
+                    <a href="{% url 'asset_report' 'unallocated_assets' %}?format=excel" class="btn btn-info">
+                        <i class="fas fa-download"></i> Download Excel
+                    </a>
+                    <a href="{% url 'unallocated_assets_report' %}" class="btn btn-outline info">
+                        <i class="fas fa-eye"></i> View Report
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Assets by Status -->
+            <div class="type-card warning">
+                <div class="type-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h3 class="type-title">Assets by Status</h3>
+                <p class="type-description">Assets grouped by their status (New, Old, Damaged)</p>
+                <div class="report-dropdown">
+                    <button class="report-dropdown-btn" onclick="toggleReportDropdown('statusDropdown')">
+                        <i class="fas fa-download"></i> Download by Status
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="report-dropdown-menu" id="statusDropdown">
+                        <a class="report-dropdown-item" href="{% url 'asset_report' 'by_status' %}?format=excel">
+                            <i class="fas fa-download"></i> All Statuses
+                        </a>
+                        {% for status_key, status_name in status_choices %}
+                        <a class="report-dropdown-item" href="{% url 'asset_report' 'by_status' %}?status={{ status_key }}&format=excel">
+                            <i class="fas fa-file-excel"></i> {{ status_name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Assets by Department -->
+            <div class="type-card">
+                <div class="type-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="type-title">Assets by Department</h3>
+                <p class="type-description">Assets grouped by employee department</p>
+                <div class="report-dropdown">
+                    <button class="report-dropdown-btn" onclick="toggleReportDropdown('deptDropdown2')">
+                        <i class="fas fa-download"></i> Download by Department
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="report-dropdown-menu" id="deptDropdown2">
+                        <a class="report-dropdown-item" href="{% url 'asset_report' 'by_department' %}?format=excel">
+                            <i class="fas fa-download"></i> All Departments
+                        </a>
+                        {% for department in departments %}
+                        <a class="report-dropdown-item" href="{% url 'asset_report' 'by_department' %}?department={{ department }}&format=excel">
+                            <i class="fas fa-file-excel"></i> {{ department }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Custom Reports -->
+            <div class="type-card info">
+                <div class="type-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3 class="type-title">Custom Reports</h3>
+                <p class="type-description">Generate custom reports based on specific criteria</p>
+                <button class="btn btn-outline info" data-toggle="modal" data-target="#customReportModal">
+                    <i class="fas fa-cog"></i> Configure
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDropdown() {
+        const dropdown = document.getElementById('exportDropdown');
+        dropdown.classList.toggle('show');
+    }
+    
+    function toggleReportDropdown(id) {
+        const dropdown = document.getElementById(id);
+        dropdown.classList.toggle('show');
+        
+        // Close other dropdowns
+        const allDropdowns = document.querySelectorAll('.report-dropdown-menu');
+        allDropdowns.forEach(item => {
+            if (item.id !== id && item.classList.contains('show')) {
+                item.classList.remove('show');
+            }
+        });
+    }
+
+    // Close the dropdown if clicked outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.export-btn') && !event.target.closest('.export-btn')) {
+            const dropdowns = document.getElementsByClassName("dropdown-menu");
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+        
+        if (!event.target.matches('.report-dropdown-btn') && !event.target.closest('.report-dropdown-btn')) {
+            const dropdowns = document.getElementsByClassName("report-dropdown-menu");
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

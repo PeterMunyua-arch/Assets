@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PC BUILD AND ISSUE FORM</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            font-size: 14px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: left;
+            height: 30px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 3px 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .signature-box {
+            height: 60px;
+            border-bottom: 1px solid #000;
+        }
+        .form-field {
+            display: inline-block;
+            min-width: 150px;
+            border-bottom: 1px solid #000;
+            padding: 0 5px;
+            margin: 0 5px;
+            height: 20px;
+        }
+        .underline {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 100px;
+            padding: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WESSEX PHARMACEUTICALS LIMITED</h1>
+        <h2>PC BUILD AND ISSUE FORM</h2>
+    </div>
+    
+    <div class="section">
+        <p><strong>PC INFORMATION:</strong></p>
+        <p>PC MODEL: <span class="form-field">{{ asset.model }}</span></p>
+        <p>COMMANY: 
+            <span class="checkbox-group">
+                <input type="checkbox" {% if asset.company.name == "WESSEX" or not asset.company.name %}checked{% endif %}> WESSEX
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if asset.company.name != "WESSEX" and asset.company.name %}checked{% endif %}> OTHER
+                {% if asset.company.name != "WESSEX" and asset.company.name %}
+                <span class="form-field">{{ asset.company.name }}</span>
+                {% endif %}
+            </span>
+        </p>
+        <p>SERIAL NO: <span class="form-field">{{ asset.serial_number }}</span></p>
+        <p>TYPE: 
+            <span class="checkbox-group">
+                <input type="checkbox" {% if asset.type == "Laptop" %}checked{% endif %}> NOTEBOOK
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if asset.type == "Desktop" %}checked{% endif %}> DESKTOP
+            </span>
+        </p>
+        <p>SPECIFICATIONS: PROCESSOR: <span class="form-field">{{ asset.processor }}</span></p>
+        <p>RAM: <span class="form-field">{{ asset.ram }}</span></p>
+        <p>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if asset.hdd_capacity %}checked{% endif %}> HDD
+                {% if asset.hdd_capacity %}<span class="form-field">{{ asset.hdd_capacity }} GB</span>{% endif %}
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if asset.ssd_capacity %}checked{% endif %}> SSD
+                {% if asset.ssd_capacity %}<span class="form-field">{{ asset.ssd_capacity }} GB</span>{% endif %}
+            </span>
+        </p>
+    </div>
+    
+    <hr>
+    
+    <div class="section">
+        <p><strong>MICROSOFT APPLICATIONS</strong></p>
+        <p>OS VERSION: 
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "Win 7" in asset.os %}checked{% endif %}> Win 7
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "Win 8" in asset.os %}checked{% endif %}> Win 8
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "Win 10" in asset.os %}checked{% endif %}> Win 10
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "Win 11" in asset.os %}checked{% endif %}> Win 11
+            </span>
+            OS LICENCE: <span class="form-field">{{ asset.os_licence }}</span>
+        </p>
+        
+        <p>OFFICE VERSION 
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "2007" in asset.office %}checked{% endif %}> 2007
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "2010" in asset.office %}checked{% endif %}> 2010
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "2013" in asset.office %}checked{% endif %}> 2013
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "2016" in asset.office %}checked{% endif %}> 2016
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "2019" in asset.office %}checked{% endif %}> 2019
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if "365" in asset.office %}checked{% endif %}> 365 SUBSCRIPTION
+            </span>
+            OFFICE LICENCE: <span class="form-field">{{ asset.office_licence }}</span>
+        </p>
+        
+        <p>MS VISIO 
+            <span class="checkbox-group">
+                <input type="checkbox" {% if asset.ms_visio %}checked{% endif %}> YES
+            </span>
+            <span class="checkbox-group">
+                <input type="checkbox" {% if not asset.ms_visio %}checked{% endif %}> NO
+            </span>
+            VERSION: <span class="form-field">{{ asset.ms_visio_version }}</span>
+            VISIO LICENCE: <span class="form-field">{{ asset.visio_licence }}</span>
+        </p>
+    </div>
+    
+    <hr>
+    
+    <div class="section">
+        <p><strong>USE ALLOCATION DETAILS:</strong></p>
+        <table>
+            <tr>
+                <th>PC NAME</th>
+                <th>USER</th>
+                <th>ISSUE DATE</th>
+                <th>STATUS</th>
+                <th>SIGN</th>
+                <th>RETURN DATE</th>
+                <th>STATUS</th>
+                <th>SIGN</th>
+            </tr>
+            <tr>
+                <td>{{ asset.name }}</td>
+                <td>{{ allocation.employee_allocated.get_full_name }}</td>
+                <td>{{ allocation.allocation_date|date:"d/m/Y" }}</td>
+                <td>ISSUED</td>
+                <td class="signature-box"></td>
+                <td></td>
+                <td></td>
+                <td class="signature-box"></td>
+            </tr>
+            <!-- Empty rows for future use -->
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </table>
+    </div>
+    
+    <hr>
+    
+    <div class="section">
+        <p><strong>OTHER APPLICATIONS & BUSINESS SUPPORT SYSTEMS</strong></p>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'adobe_reader' in asset.applications %}checked{% endif %}> ADOBE READER
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'java' in asset.applications %}checked{% endif %}> JAVA
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'wireshark' in asset.applications %}checked{% endif %}> WIRESHARK
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'antivirus' in asset.applications %}checked{% endif %}> ANTIVIRUS(GOPHOS)
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'data_logger' in asset.applications %}checked{% endif %}> DATA LOGGER(s)
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'zoom' in asset.applications %}checked{% endif %}> ZOOM
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'chrome' in asset.applications %}checked{% endif %}> BROWSER(Chrome Recommended)
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'printer' in asset.applications %}checked{% endif %}> PRINTER(s)
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'other_apps' in asset.applications %}checked{% endif %}> OTHERS
+            {% if asset.applications_description %}
+            <span class="form-field">{{ asset.applications_description }}</span>
+            {% endif %}
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'anydesk' in asset.applications or 'teamviewer' in asset.applications %}checked{% endif %}> ANYDESK/TEAMVIEWER
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'hr_software' in asset.applications %}checked{% endif %}> HR SOFTWARES
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'falcon' in asset.applications %}checked{% endif %}> FALCON
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" {% if 'shared_folders' in asset.applications %}checked{% endif %}> SHARED FOLDERS
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px; text-align: center;">
+        <button onclick="window.print()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Print Form
+        </button>
+    </div>
+</body>
+</html>

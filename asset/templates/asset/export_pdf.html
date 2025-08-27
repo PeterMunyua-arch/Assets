@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Assets Export - {{ date }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { color: #333; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background-color: #f2f2f2; text-align: left; padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; }
+        .status-allocated { color: green; }
+        .status-unallocated { color: blue; }
+        .footer { margin-top: 30px; text-align: right; font-size: 0.8em; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Assets Report</h1>
+    <p>Generated on: {{ date }}</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Serial Number</th>
+                <th>Type</th>
+                <th>Model</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Purchase Date</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for asset in assets %}
+            <tr>
+                <td>{{ asset.serial_number }}</td>
+                <td>{{ asset.get_type_display }}</td>
+                <td>{{ asset.model }}</td>
+                <td>{{ asset.company.name }}</td>
+                <td class="status-{% if asset.is_allocated %}allocated{% else %}unallocated{% endif %}">
+                    {% if asset.is_allocated %}Allocated{% else %}Unallocated{% endif %}
+                </td>
+                <td>{{ asset.purchase_date|date:"Y-m-d" }}</td>
+                <td>{{ asset.purchase_price|default:"" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        Total assets: {{ assets|length }}
+    </div>
+</body>
+</html>

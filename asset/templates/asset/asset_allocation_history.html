@@ -1,0 +1,187 @@
+{% extends 'asset/base.html' %}
+
+{% block title %}Asset Allocation History - {{ asset.serial_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-history mr-2"></i>Asset History
+            <small class="text-muted">{{ asset.serial_number }}</small>
+        </h1>
+        <a href="{% url 'allocated_assets_report' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Allocations
+        </a>
+    </div>
+
+    <!-- Asset Summary Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Asset Details</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="asset-details">
+                        <h4>{{ asset.name }} <small class="text-muted">{{ asset.model }}</small></h4>
+                        <p class="mb-1"><strong>Type:</strong> {{ asset.get_type_display }}</p>
+                        <p class="mb-1"><strong>Serial:</strong> <code>{{ asset.serial_number }}</code></p>
+                        <p class="mb-1"><strong>Purchase Date:</strong> {{ asset.purchase_date|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="current-status">
+                        {% if asset.current_allocation %}
+                        <div class="alert alert-success">
+                            <h5 class="alert-heading">Currently Allocated</h5>
+                            <p class="mb-0">
+                                <strong>To:</strong> {{ asset.current_allocation.employee_allocated }}<br>
+                                <strong>Since:</strong> {{ asset.current_allocation.allocation_date|date:"M d, Y" }}<br>
+                                <strong>Status:</strong> 
+                                <span class="badge badge-{{ asset.current_allocation.asset_status == 'new'|yesno:'success,info,danger' }}">
+                                    {{ asset.current_allocation.get_asset_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Currently Unallocated</h5>
+                            <p class="mb-0">This asset is not currently assigned to any employee.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Allocation History</h6>
+        </div>
+        <div class="card-body">
+            <div class="timeline">
+                {% for event in history %}
+                <div class="timeline-item {% cycle 'left' 'right' %}">
+                    <div class="timeline-badge 
+                        {% if event.type == 'allocation' %}bg-primary
+                        {% else %}bg-success{% endif %}">
+                        <i class="fas fa-{% if event.type == 'allocation' %}user-check{% else %}exchange-alt{% endif %}"></i>
+                    </div>
+                    <div class="timeline-panel">
+                        <div class="timeline-heading">
+                            <h5 class="timeline-title">
+                                {% if event.type == 'allocation' %}
+                                Allocation
+                                {% else %}
+                                Return
+                                {% endif %}
+                            </h5>
+                            <p class="text-muted small">
+                                <i class="far fa-clock"></i> {{ event.date|date:"M d, Y" }}
+                            </p>
+                        </div>
+                        <div class="timeline-body">
+                            <p>
+                                <strong>Employee:</strong> {{ event.employee }}<br>
+                                <strong>Status:</strong> 
+                                <span class="badge badge-{{ event.status == 'new'|yesno:'success,info,danger' }}">
+                                    {{ event.object.get_asset_status_display }}
+                                </span>
+                            </p>
+                            {% if event.type == 'allocation' and not event.object.return_date %}
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-exchange-alt"></i> Initiate Return
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-history fa-3x text-gray-300 mb-3"></i>
+                    <h5>No Allocation History Found</h5>
+                    <p class="text-muted">This asset has no recorded allocation history.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e3e6f0;
+        left: 50%;
+        margin-left: -1px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .timeline-badge {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        left: 50%;
+        margin-left: -25px;
+        top: 0;
+    }
+    
+    .timeline-panel {
+        width: calc(50% - 60px);
+        padding: 20px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    }
+    
+    .timeline-item.left .timeline-panel {
+        float: left;
+    }
+    
+    .timeline-item.right .timeline-panel {
+        float: right;
+    }
+    
+    .timeline-title {
+        margin-top: 0;
+        color: #4e73df;
+    }
+    
+    @media (max-width: 768px) {
+        .timeline::before {
+            left: 40px;
+        }
+        
+        .timeline-badge {
+            left: 40px;
+        }
+        
+        .timeline-panel {
+            width: calc(100% - 90px);
+            float: right !important;
+        }
+    }
+</style>
+{% endblock %}
