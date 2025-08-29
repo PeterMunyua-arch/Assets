@@ -115,8 +115,8 @@ class Asset(models.Model):
     ssd_capacity = models.CharField(max_length=20, blank=True, null=True, verbose_name="SSD Capacity (GB/TB)")
     hdd_capacity = models.CharField(max_length=20, blank=True, null=True, verbose_name="HDD Capacity (GB/TB)")
     
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
-    purchase_date = models.DateField(blank=True)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    purchase_date = models.DateField(blank=True, null=True)
     serial_number = models.CharField(max_length=100)
     accessories = models.CharField(max_length=100, null=True, blank=True)
     ip = models.GenericIPAddressField(protocol='both', unpack_ipv4=False, blank=True, null=True)  # Changed from DecimalField

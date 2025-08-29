@@ -772,6 +772,7 @@ def mass_upload(request):
     
     return render(request, 'asset/mass_upload.html', {'form': form})
 
+
 def read_uploaded_file(file):
     """Read uploaded file and return DataFrame"""
     ext = file.name.split('.')[-1].lower()
