@@ -23,6 +23,27 @@ class Employee(models.Model):
     def __str__(self):
         return self.first_name +" "+ self.last_name
     
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+    
+    @classmethod
+    def find_by_name(cls, first_name, last_name):
+        """Find employee by first and last name (case-insensitive)"""
+        try:
+            return cls.objects.get(
+                first_name__iexact=first_name.strip(),
+                last_name__iexact=last_name.strip()
+            )
+        except cls.DoesNotExist:
+            return None
+        except cls.MultipleObjectsReturned:
+            # Return the first one if multiple found
+            return cls.objects.filter(
+                first_name__iexact=first_name.strip(),
+                last_name__iexact=last_name.strip()
+            ).first()
+    
     @classmethod
     def get_import_fields(cls):
         """Return mapping of CSV column names to model fields"""
@@ -270,14 +291,14 @@ class AssetAllocation(models.Model):
 
     @classmethod
     def get_import_fields(cls):
-        """Return mapping of CSV column names to model fields"""
         return {
             'asset_serial_number': 'asset',
-            'employee_email': 'employee_allocated',
+            'employee_first_name': 'employee_allocated__first_name',
+            'employee_last_name': 'employee_allocated__last_name',
             'allocation_date': 'allocation_date',
             'return_date': 'return_date',
             'asset_status': 'asset_status'
-        }
+            }
 
 class AssetReturn(models.Model):
     ASSET_STATUS_CHOICES = [

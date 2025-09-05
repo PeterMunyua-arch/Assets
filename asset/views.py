@@ -761,39 +761,83 @@ def mass_upload(request):
                 elif upload_type == 'allocation':
                     result = process_allocation_upload(file)
                 
-                messages.success(request, result['message'])
+                if result['error_count'] > 0:
+                    # Show warning if there were errors but some succeeded
+                    messages.warning(request, result['message'])
+                else:
+                    messages.success(request, result['message'])
+                    
+                # Store errors in session to display on page
+                if result['errors']:
+                    request.session['upload_errors'] = result['errors'][:10]  # Store first 10 errors
+                
                 return redirect('mass_upload')
                 
             except Exception as e:
-                messages.error(request, f"Error processing file: {str(e)}")
+                error_msg = f"Error processing file: {str(e)}"
+                print(error_msg)
+                messages.error(request, error_msg)
                 return render(request, 'asset/mass_upload.html', {'form': form})
     else:
         form = MassUploadForm()
+        
+        # Check if there are errors from previous upload to display
+        upload_errors = request.session.pop('upload_errors', None)
     
-    return render(request, 'asset/mass_upload.html', {'form': form})
+    return render(request, 'asset/mass_upload.html', {
+        'form': form,
+        'upload_errors': upload_errors
+    })
 
 
 def read_uploaded_file(file):
-    """Read uploaded file and return DataFrame"""
-    ext = file.name.split('.')[-1].lower()
+    """Read uploaded file (CSV or Excel) into a DataFrame"""
+    file_name = file.name.lower()
     
-    if ext == 'csv':
-        # Detect encoding for CSV files
-        raw_data = file.read()
-        detected = chardet.detect(raw_data)
-        encoding = detected['encoding'] if detected['encoding'] else 'utf-8'
-        
-        # Reset file pointer
-        file.seek(0)
-        
-        # Read CSV with detected encoding
-        return pd.read_csv(file, encoding=encoding)
-    
-    elif ext in ['xlsx', 'xls']:
-        return pd.read_excel(file)
-    
-    else:
-        raise ValueError("Unsupported file format")
+    try:
+        if file_name.endswith('.csv'):
+            # Try different encodings and separators
+            encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'windows-1252']
+            separators = [',', '\t', ';']
+            
+            for encoding in encodings:
+                for sep in separators:
+                    try:
+                        file.seek(0)  # Reset file pointer
+                        df = pd.read_csv(file, encoding=encoding, sep=sep)
+                        print(f"Successfully read CSV with encoding: {encoding}, separator: '{sep}'")
+                        print(f"Columns: {df.columns.tolist()}")
+                        print(f"Shape: {df.shape}")
+                        return df
+                    except (UnicodeDecodeError, pd.errors.ParserError):
+                        continue
+            
+            # If all else fails, try with error handling
+            file.seek(0)
+            try:
+                df = pd.read_csv(file, encoding='utf-8', sep=None, engine='python', on_bad_lines='skip')
+                print("Read CSV with error handling")
+                return df
+            except:
+                file.seek(0)
+                df = pd.read_csv(file, error_bad_lines=False)
+                print("Read CSV with error_bad_lines=False")
+                return df
+            
+        elif file_name.endswith(('.xlsx', '.xls')):
+            file.seek(0)
+            df = pd.read_excel(file)
+            print(f"Successfully read Excel file")
+            print(f"Columns: {df.columns.tolist()}")
+            print(f"Shape: {df.shape}")
+            return df
+            
+        else:
+            raise ValueError("Unsupported file format. Please upload a CSV or Excel file.")
+            
+    except Exception as e:
+        print(f"Error reading file: {str(e)}")
+        raise ValueError(f"Error reading file: {str(e)}")
 
 def process_asset_upload(file):
     """Process asset upload from CSV/Excel"""
@@ -936,13 +980,31 @@ def process_employee_upload(file):
     return {'message': message, 'success_count': success_count, 'error_count': error_count, 'errors': errors}
 
 def process_allocation_upload(file):
-    """Process allocation upload from CSV/Excel"""
+    """Process allocation upload using employee names"""
     df = read_uploaded_file(file)
     
     # Normalize column names
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
     
-    required_columns = ['asset_serial_number', 'employee_email', 'allocation_date']
+    # Map possible column names to standard names
+    column_mapping = {
+        'asset_serial_number': ['asset_serial_number', 'serial_number', 'serial', 'asset_serial'],
+        'employee_first_name': ['employee_first_name', 'first_name', 'firstname', 'fname'],
+        'employee_last_name': ['employee_last_name', 'last_name', 'lastname', 'lname'],
+        'allocation_date': ['allocation_date', 'date', 'alloc_date'],
+        'return_date': ['return_date', 'returndate'],
+        'asset_status': ['asset_status', 'status']
+    }
+    
+    # Rename columns
+    for std_name, possible_names in column_mapping.items():
+        for possible_name in possible_names:
+            if possible_name in df.columns:
+                df = df.rename(columns={possible_name: std_name})
+                break
+    
+    # Check required columns
+    required_columns = ['asset_serial_number', 'employee_first_name', 'employee_last_name', 'allocation_date']
     missing_columns = [col for col in required_columns if col not in df.columns]
     
     if missing_columns:
@@ -954,55 +1016,67 @@ def process_allocation_upload(file):
     
     with transaction.atomic():
         for index, row in df.iterrows():
+            row_num = index + 2  # +2 for header row and 0-based index
+            
             try:
-                allocation_data = {}
+                # Get and validate serial number
+                serial_number = str(row.get('asset_serial_number', '')).strip()
+                if not serial_number or serial_number.lower() in ['nan', 'null', 'none']:
+                    errors.append(f"Row {row_num}: Serial number is required")
+                    error_count += 1
+                    continue
                 
-                # Map CSV columns to model fields
-                field_mapping = AssetAllocation.get_import_fields()
-                for csv_col, model_field in field_mapping.items():
-                    if csv_col in df.columns and pd.notna(row.get(csv_col)):
-                        allocation_data[model_field] = row[csv_col]
-                
-                # Handle asset field (by serial number)
-                serial_number = allocation_data.get('asset')
+                # Find asset
                 try:
                     asset = Asset.objects.get(serial_number=serial_number)
-                    allocation_data['asset'] = asset
                 except Asset.DoesNotExist:
-                    errors.append(f"Row {index+2}: Asset with serial number {serial_number} not found")
+                    errors.append(f"Row {row_num}: Asset with serial number '{serial_number}' not found")
                     error_count += 1
                     continue
                 
-                # Handle employee field (by email)
-                email = allocation_data.get('employee_allocated')
-                try:
-                    employee = Employee.objects.get(email=email)
-                    allocation_data['employee_allocated'] = employee
-                except Employee.DoesNotExist:
-                    errors.append(f"Row {index+2}: Employee with email {email} not found")
+                # Get employee names
+                first_name = str(row.get('employee_first_name', '')).strip()
+                last_name = str(row.get('employee_last_name', '')).strip()
+                
+                if not first_name or not last_name:
+                    errors.append(f"Row {row_num}: Both first and last name are required")
                     error_count += 1
                     continue
                 
-                # Handle date fields
-                for date_field in ['allocation_date', 'return_date']:
-                    if date_field in allocation_data and pd.notna(allocation_data[date_field]):
-                        if isinstance(allocation_data[date_field], str):
-                            try:
-                                allocation_data[date_field] = datetime.strptime(
-                                    allocation_data[date_field], '%Y-%m-%d'
-                                ).date()
-                            except ValueError:
-                                try:
-                                    allocation_data[date_field] = datetime.strptime(
-                                        allocation_data[date_field], '%m/%d/%Y'
-                                    ).date()
-                                except ValueError:
-                                    errors.append(f"Row {index+2}: Invalid date format for {date_field}")
-                                    error_count += 1
-                                    continue
+                # Find employee
+                employee = Employee.find_by_name(first_name, last_name)
+                if not employee:
+                    errors.append(f"Row {row_num}: Employee '{first_name} {last_name}' not found")
+                    error_count += 1
+                    continue
+                
+                # Parse dates
+                allocation_date = parse_date(row.get('allocation_date'), row_num, 'allocation_date', errors)
+                return_date = parse_date(row.get('return_date'), row_num, 'return_date', errors) if pd.notna(row.get('return_date')) else None
+                
+                if allocation_date is None:
+                    error_count += 1
+                    continue
+                
+                # Get asset status
+                asset_status = str(row.get('asset_status', 'new')).strip().lower()
+                if asset_status not in ['new', 'old', 'damaged']:
+                    asset_status = 'new'
+                
+                # Check if asset is already allocated
+                if AssetAllocation.objects.filter(asset=asset, return_date__isnull=True).exists():
+                    errors.append(f"Row {row_num}: Asset {serial_number} is already allocated")
+                    error_count += 1
+                    continue
                 
                 # Create allocation
-                allocation = AssetAllocation.objects.create(**allocation_data)
+                allocation = AssetAllocation.objects.create(
+                    asset=asset,
+                    employee_allocated=employee,
+                    allocation_date=allocation_date,
+                    return_date=return_date,
+                    asset_status=asset_status
+                )
                 
                 # Update asset status
                 asset.is_allocated = True
@@ -1012,16 +1086,49 @@ def process_allocation_upload(file):
                 success_count += 1
                 
             except Exception as e:
-                errors.append(f"Row {index+2}: {str(e)}")
+                errors.append(f"Row {row_num}: Unexpected error - {str(e)}")
                 error_count += 1
     
-    message = f"Processed {success_count} allocations successfully."
+    message = f"Successfully processed {success_count} allocations"
     if error_count > 0:
-        message += f" {error_count} errors occurred."
-        if errors:
-            message += " First error: " + errors[0]
+        message += f" with {error_count} errors"
     
-    return {'message': message, 'success_count': success_count, 'error_count': error_count, 'errors': errors}
+    return {
+        'message': message,
+        'success_count': success_count,
+        'error_count': error_count,
+        'errors': errors
+    }
+
+def parse_date(date_value, row_num, field_name, errors):
+    """Parse date from various formats"""
+    if pd.isna(date_value) or date_value == '':
+        errors.append(f"Row {row_num}: {field_name} is required")
+        return None
+    
+    try:
+        # Try different date formats
+        if isinstance(date_value, datetime):
+            return date_value.date()
+        
+        if isinstance(date_value, str):
+            # Try common date formats
+            for fmt in ['%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y', '%Y/%m/%d']:
+                try:
+                    return datetime.strptime(date_value.strip(), fmt).date()
+                except ValueError:
+                    continue
+        
+        # Try pandas timestamp
+        if hasattr(date_value, 'date'):
+            return date_value.date()
+            
+        errors.append(f"Row {row_num}: Invalid date format for {field_name}: '{date_value}'")
+        return None
+        
+    except Exception as e:
+        errors.append(f"Row {row_num}: Error parsing {field_name}: {str(e)}")
+        return None
 
 
 @login_required
@@ -1049,7 +1156,7 @@ def download_template(request, template_type):
     elif template_type == 'allocation':
         # Create allocation template
         columns = [
-            'asset_serial_number', 'employee_email', 'allocation_date',
+            'asset_serial_number', 'employee_first_name', 'employee_last_name', 'allocation_date',
             'return_date', 'asset_status'
         ]
         filename = 'allocation_upload_template.csv'
@@ -1082,9 +1189,9 @@ class AssetReportView(LoginRequiredMixin, View):
             return self.allocated_assets_report(request, format)
         elif report_type == 'unallocated_assets':
             return self.unallocated_assets_report(request, format)
-        elif report_type == 'by_status':
+        elif report_type == 'status':
             return self.assets_by_status_report(request, format)
-        elif report_type == 'by_department':
+        elif report_type == 'department':
             return self.assets_by_department_report(request, format)
         else:
             return HttpResponse("Invalid report type", status=400)
@@ -1265,23 +1372,317 @@ class AssetReportView(LoginRequiredMixin, View):
         
         return response
     
-@login_required
-def reports_dashboard(request):
-    """Display all available reports"""
+# @login_required
+#def reports_dashboard(request):
+   # """Display all available reports"""
     # Get counts for dashboard
-    total_assets = Asset.objects.count()
-    allocated_assets = Asset.objects.filter(is_allocated=True).count()
-    unallocated_assets = total_assets - allocated_assets
+   # total_assets = Asset.objects.count()
+   # allocated_assets = Asset.objects.filter(is_allocated=True).count()
+    #unallocated_assets = total_assets - allocated_assets
     
     # Get unique departments
-    departments = Employee.objects.values_list('department', flat=True).distinct()
+    #departments = Employee.objects.values_list('department', flat=True).distinct()
     
-    context = {
-        'total_assets': total_assets,
-        'allocated_assets': allocated_assets,
-        'unallocated_assets': unallocated_assets,
-        'departments': departments,
-        'status_choices': AssetAllocation.ASSET_STATUS_CHOICES,
-    }
-    return render(request, 'asset/reports_dashboard.html', context)
+   # context = {
+   #     'total_assets': total_assets,
+     #   'allocated_assets': allocated_assets,
+     #   'unallocated_assets': unallocated_assets,
+      #  'departments': departments,
+      #  'status_choices': AssetAllocation.ASSET_STATUS_CHOICES,
+   # }
+   # return render(request, 'asset/reports_dashboard.html', context)
 
+
+
+from django.http import JsonResponse
+from django.db.models import Count, Q, Prefetch
+from django.views.generic import TemplateView
+
+# Add these class-based views
+class ReportsDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'asset/reports_dashboard.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get counts for dashboard
+        total_assets = Asset.objects.count()
+        allocated_assets = Asset.objects.filter(is_allocated=True).count()
+        unallocated_assets = total_assets - allocated_assets
+        
+        # Get all companies
+        companies = Company.objects.annotate(
+            asset_count=Count('asset'),
+            allocated_count=Count('asset', filter=Q(asset__is_allocated=True)),
+            unallocated_count=Count('asset', filter=Q(asset__is_allocated=False))
+        )
+        
+        # Get unique departments - filter out empty/null values
+        departments = Employee.objects.exclude(
+            Q(department__isnull=True) | Q(department__exact='')
+        ).values_list('department', flat=True).distinct()
+        
+        # Get asset type counts
+        asset_types = Asset.ASSET_TYPE_CHOICES
+        asset_type_counts = []
+        
+        for type_code, type_name in asset_types:
+            count = Asset.objects.filter(type=type_code).count()
+            allocated_count = Asset.objects.filter(type=type_code, is_allocated=True).count()
+            unallocated_count = Asset.objects.filter(type=type_code, is_allocated=False).count()
+            
+            asset_type_counts.append({
+                'type_code': type_code,
+                'type_name': type_name,
+                'total_count': count,
+                'allocated_count': allocated_count,
+                'unallocated_count': unallocated_count
+            })
+        
+        context.update({
+            'total_assets': total_assets,
+            'allocated_assets': allocated_assets,
+            'unallocated_assets': unallocated_assets,
+            'companies': companies,
+            'departments': departments,
+            'asset_types': asset_types,
+            'asset_type_counts': asset_type_counts,
+            'status_choices': AssetAllocation.ASSET_STATUS_CHOICES,
+        })
+        
+        return context
+
+# Add these report views
+class CompanyAssetsReport(LoginRequiredMixin, ListView):
+    model = Asset
+    template_name = 'asset/company_assets.html'
+    context_object_name = 'assets'
+    paginate_by = 25
+    
+    def get_queryset(self):
+        company_id = self.kwargs.get('company_id')
+        if company_id:
+            return Asset.objects.filter(
+                company_id=company_id
+            ).select_related('company').prefetch_related(
+                Prefetch(
+                    'assetallocation_set',
+                    queryset=AssetAllocation.objects.filter(return_date__isnull=True),
+                    to_attr='current_allocation'
+                )
+            ).order_by('type', 'serial_number')
+        return Asset.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        company_id = self.kwargs.get('company_id')
+        company = Company.objects.get(id=company_id)
+        
+        context['report_title'] = f"Assets Report - {company.name}"
+        context['company'] = company
+        context['total_count'] = self.get_queryset().count()
+        
+        # Add counts by status
+        context['allocated_count'] = self.get_queryset().filter(is_allocated=True).count()
+        context['unallocated_count'] = self.get_queryset().filter(is_allocated=False).count()
+        
+        return context
+
+class DepartmentAssetsReport(LoginRequiredMixin, ListView):
+    model = AssetAllocation
+    template_name = 'asset/department_assets.html'
+    context_object_name = 'allocations'
+    paginate_by = 25
+    
+    def get_queryset(self):
+        department = self.kwargs.get('department')
+        if department and department.strip():  # Check if department is not empty
+            return AssetAllocation.objects.filter(
+                employee_allocated__department=department,
+                return_date__isnull=True
+            ).select_related(
+                'asset', 'employee_allocated', 'asset__company'
+            ).order_by('asset__type', 'asset__serial_number')
+        return AssetAllocation.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        department = self.kwargs.get('department')
+        
+        if not department or not department.strip():
+            # Handle empty department case
+            context['report_title'] = "Invalid Department"
+            context['department'] = "Invalid"
+            context['total_count'] = 0
+            return context
+        
+        context['report_title'] = f"Department Assets Report - {department}"
+        context['department'] = department
+        context['total_count'] = self.get_queryset().count()
+        
+        return context
+
+class AssetTypeReport(LoginRequiredMixin, ListView):
+    model = Asset
+    template_name = 'asset/asset_type_report.html'
+    context_object_name = 'assets'
+    paginate_by = 25
+    
+    def get_queryset(self):
+        asset_type = self.kwargs.get('asset_type')
+        if asset_type:
+            return Asset.objects.filter(
+                type=asset_type
+            ).select_related('company').prefetch_related(
+                Prefetch(
+                    'assetallocation_set',
+                    queryset=AssetAllocation.objects.filter(return_date__isnull=True),
+                    to_attr='current_allocation'
+                )
+            ).order_by('serial_number')
+        return Asset.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        asset_type = self.kwargs.get('asset_type')
+        asset_type_name = dict(Asset.ASSET_TYPE_CHOICES).get(asset_type, asset_type)
+        
+        context['report_title'] = f"{asset_type_name} Assets Report"
+        context['asset_type'] = asset_type
+        context['asset_type_name'] = asset_type_name
+        context['total_count'] = self.get_queryset().count()
+        
+        # Add counts by status
+        context['allocated_count'] = self.get_queryset().filter(is_allocated=True).count()
+        context['unallocated_count'] = self.get_queryset().filter(is_allocated=False).count()
+        
+        return context
+
+# Add these export functions
+@login_required
+def export_company_assets(request, company_id):
+    """Export company assets to Excel"""
+    company = get_object_or_404(Company, id=company_id)
+    assets = Asset.objects.filter(company=company).select_related('company')
+    
+    return export_assets_to_excel(assets, f"Assets_Report_{company.name}")
+
+@login_required
+def export_department_assets(request, department):
+    """Export department assets to Excel"""
+    if not department or not department.strip():
+        # Return empty response for invalid department
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Invalid_Department_Report.xlsx"'
+        return response
+    
+    allocations = AssetAllocation.objects.filter(
+        employee_allocated__department=department,
+        return_date__isnull=True
+    ).select_related('asset', 'employee_allocated', 'asset__company')
+    
+    return export_allocations_to_excel(allocations, f"Department_Assets_Report_{department}")
+
+@login_required
+def export_asset_type_assets(request, asset_type):
+    """Export asset type assets to Excel"""
+    assets = Asset.objects.filter(type=asset_type).select_related('company')
+    
+    return export_assets_to_excel(assets, f"{asset_type.capitalize()}_Assets_Report")
+
+@login_required
+def export_allocated_assets(request):
+    """Export allocated assets to Excel"""
+    assets = Asset.objects.filter(is_allocated=True).select_related('company')
+    
+    return export_assets_to_excel(assets, "Allocated_Assets_Report")
+
+@login_required
+def export_unallocated_assets(request):
+    """Export unallocated assets to Excel"""
+    assets = Asset.objects.filter(is_allocated=False).select_related('company')
+    
+    return export_assets_to_excel(assets, "Unallocated_Assets_Report")
+
+# Helper functions for export
+def export_assets_to_excel(assets, title):
+    """Export assets data to Excel format"""
+    data = []
+    for asset in assets:
+        current_allocation = asset.current_allocation()
+        allocated_to = f"{current_allocation.employee_allocated.first_name} {current_allocation.employee_allocated.last_name}" if current_allocation else "Not Allocated"
+        department = current_allocation.employee_allocated.department if current_allocation else "N/A"
+        
+        data.append({
+            'Name': asset.name,
+            'Serial Number': asset.serial_number,
+            'Type': asset.get_type_display(),
+            'Model': asset.model,
+            'Company': asset.company.name,
+            'Status': 'Allocated' if asset.is_allocated else 'Unallocated',
+            'Allocated To': allocated_to,
+            'Department': department,
+            'Purchase Date': asset.purchase_date.strftime("%Y-%m-%d") if asset.purchase_date else "",
+            'Purchase Price': str(asset.purchase_price) if asset.purchase_price else ""
+        })
+    
+    return generate_excel_response(data, title)
+
+def export_allocations_to_excel(allocations, title):
+    """Export allocation data to Excel format"""
+    data = []
+    for allocation in allocations:
+        data.append({
+            'Asset Name': allocation.asset.name,
+            'Serial Number': allocation.asset.serial_number,
+            'Type': allocation.asset.get_type_display(),
+            'Model': allocation.asset.model,
+            'Company': allocation.asset.company.name,
+            'Allocated To': f"{allocation.employee_allocated.first_name} {allocation.employee_allocated.last_name}",
+            'Department': allocation.employee_allocated.department,
+            'Email': allocation.employee_allocated.email,
+            'Allocation Date': allocation.allocation_date.strftime("%Y-%m-%d"),
+            'Asset Status': allocation.get_asset_status_display()
+        })
+    
+    return generate_excel_response(data, title)
+
+def generate_excel_response(data, title):
+    """Generate Excel file from data and return as HTTP response"""
+    if not data:
+        # Return empty Excel file with message
+        df = pd.DataFrame({"Message": ["No data available for this report"]})
+    else:
+        df = pd.DataFrame(data)
+    
+    # Create Excel file in memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name=title[:30], index=False)
+        
+        # Auto-adjust columns width
+        worksheet = writer.sheets[title[:30]]
+        for column in worksheet.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            worksheet.column_dimensions[column_letter].width = adjusted_width
+    
+    # Prepare HTTP response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"{title.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Write Excel file to response
+    output.seek(0)
+    response.write(output.getvalue())
+    
+    return response

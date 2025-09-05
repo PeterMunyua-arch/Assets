@@ -263,3 +263,4 @@ class MassUploadForm(forms.Form):
                 raise forms.ValidationError("File size too large. Maximum size is 10MB.")
                 
         return file
+    

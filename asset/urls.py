@@ -18,7 +18,6 @@ urlpatterns = [
     path('asset-allocation/', views.asset_allocation_form, name='asset_allocation_form'),
     path('asset-return/', views.asset_return_form, name='asset_return_form'),
     path('logout/', views.logout_view, name='logout'),
-    path('signup/', views.signup_view, name='signup'),
     path('password_change/', views.password_change_view, name='password_change'),
     path('password_reset/', views.password_reset_view, name='password_reset'),
     path('password_reset_done/', views.password_reset_done_view, name='password_reset_done'),
@@ -27,7 +26,6 @@ urlpatterns = [
     path('asset_detail/<int:asset_id>/', views.asset_detail, name='asset_detail'),
     path('assetreturn_detail/<int:asset_id>/', views.assetreturn_detail, name='assetreturn_detail'),
     path('signin/',views.signin, name='signin'),
-    path('signup/',views.signup, name='signup'),
     path('profile/',views.profile, name='profile'),
     path('search/', views.search, name='search'),
     path('asset/<int:asset_id>/', views.asset_detail, name='asset_detail'),
@@ -44,7 +42,24 @@ urlpatterns = [
     path('download-template/<str:template_type>/', views.download_template, name='download_template'),
     path('allocation/<int:allocation_id>/form/', views.generate_allocation_form, name='generate_allocation_form'),
     path('reports/<str:report_type>/', views.AssetReportView.as_view(), name='asset_report'),
-    path('report/', views.reports_dashboard, name='reports_dashboard')
+    # path('report/', views.reports_dashboard, name='reports_dashboard'),
+    path('reports/', views.ReportsDashboardView.as_view(), name='reports_dashboard'),
+    
+    # Company reports
+    path('reports/company/<int:company_id>/', views.CompanyAssetsReport.as_view(), name='company_assets_report'),
+    path('reports/company/<int:company_id>/export/', views.export_company_assets, name='export_company_assets'),
+    
+    # Department reports
+    path('reports/department/<str:department>/', views.DepartmentAssetsReport.as_view(), name='department_assets_report'),
+    path('reports/department/<str:department>/export/', views.export_department_assets, name='export_department_assets'),
+    
+    # Asset type reports
+    path('reports/asset-type/<str:asset_type>/', views.AssetTypeReport.as_view(), name='asset_type_report'),
+    path('reports/asset-type/<str:asset_type>/export/', views.export_asset_type_assets, name='export_asset_type_assets'),
+    
+    # Allocated/Unallocated reports
+    path('reports/allocated/export/', views.export_allocated_assets, name='export_allocated_assets'),
+    path('reports/unallocated/export/', views.export_unallocated_assets, name='export_unallocated_assets'),
     # Add these to your urlpatterns
 
 ]

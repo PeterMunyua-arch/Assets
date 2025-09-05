@@ -1,19 +1,312 @@
-{% extends 'asset/base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Return Form - WESSEX PHARMACEUTICALS LIMITED</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+            line-height: 1.2;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 210mm;
+            height: 297mm;
+            padding: 10mm;
+            box-sizing: border-box;
+            position: relative;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .header h2 {
+            font-size: 16px;
+            margin: 5px 0;
+            font-weight: bold;
+            color: #34495e;
+        }
+        .section {
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-decoration: underline;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+        .form-field {
+            display: inline-block;
+            border-bottom: 1px solid black;
+            min-width: 100px;
+            height: 16px;
+            vertical-align: bottom;
+            margin: 0 5px;
+            padding: 0 3px;
+        }
+        .form-field-large {
+            min-width: 200px;
+        }
+        .info-row {
+            margin-bottom: 8px;
+        }
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+            font-size: 11px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        th, td {
+            padding: 3px;
+            text-align: center;
+            height: 20px;
+        }
+        hr {
+            border-top: 1px solid black;
+            margin: 8px 0;
+        }
+        .signature-box {
+            height: 40px;
+            border-bottom: 1px solid #000;
+        }
+        .signature-section {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-area {
+            display: flex;
+            flex-direction: column;
+            width: 250px;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 100%;
+            margin-top: 5px;
+        }
+        .signature-label {
+            font-size: 11px;
+            text-align: center;
+            width: 100%;
+        }
+        .personnel-name {
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+        .personnel-name-field {
+            border-bottom: 1px solid #000;
+            padding: 3px;
+            min-height: 18px;
+            display: inline-block;
+            width: 200px;
+        }
+        .action-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-print {
+            background-color: #3498db;
+            color: white;
+        }
+        @media print {
+            body {
+                width: 210mm;
+                height: 297mm;
+                background-color: white;
+                box-shadow: none;
+            }
+            .container {
+                width: 210mm;
+                height: 297mm;
+                padding: 10mm;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+        .return-status {
+            font-weight: bold;
+            color: #c0392b;
+            text-align: center;
+            margin: 10px 0;
+            padding: 5px;
+            border: 1px solid #c0392b;
+            background-color: #ffebee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WESSEX PHARMACEUTICALS LIMITED</h1>
+            <h2>ASSET RETURN FORM</h2>
+        </div>
+        
+        <div class="return-status">
+            ASSET RETURNED - {{ asset_return.return_date|date:"d/m/Y" }}
+        </div>
+        
+        <div class="section">
+            <div class="section-title">ASSET INFORMATION:</div>
+            <div class="info-row">
+                <span class="info-label">Asset Name:</span>
+                <span class="form-field form-field-large">{{ asset_return.asset.name|default:" " }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Serial Number:</span>
+                <span class="form-field">{{ asset_return.asset.serial_number|default:" " }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Model:</span>
+                <span class="form-field">{{ asset_return.asset.model|default:" " }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Asset Type:</span>
+                <span class="form-field">{{ asset_return.asset.get_type_display|default:" " }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Company:</span>
+                <span class="form-field">{{ asset_return.asset.company|default:" " }}</span>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="section">
+            <div class="section-title">RETURN DETAILS:</div>
+            <div class="info-row">
+                <span class="info-label">Returned By:</span>
+                <span class="form-field form-field-large">{{ asset_return.employee_returning|default:" " }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Return Date:</span>
+                <span class="form-field">{{ asset_return.return_date|date:"d/m/Y"|default:" " }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Asset Status:</span>
+                <span class="form-field">{{ asset_return.get_asset_status_display|default:" " }}</span>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="section">
+            <div class="section-title">ASSET CONDITION AT RETURN:</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Condition</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Physical Condition</td>
+                        <td class="signature-box"></td>
+                        <td class="signature-box"></td>
+                    </tr>
+                    <tr>
+                        <td>Screen</td>
+                        <td class="signature-box"></td>
+                        <td class="signature-box"></td>
+                    </tr>
+                    <tr>
+                        <td>Keyboard</td>
+                        <td class="signature-box"></td>
+                        <td class="signature-box"></td>
+                    </tr>
+                    <tr>
+                        <td>Battery</td>
+                        <td class="signature-box"></td>
+                        <td class="signature-box"></td>
+                    </tr>
+                    <tr>
+                        <td>Accessories</td>
+                        <td class="signature-box"></td>
+                        <td class="signature-box"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="signature-section">
+            <div class="signature-area">
+                <div class="personnel-name">
+                    IT Personnel Name: <span class="personnel-name-field"></span>
+                </div>
+                <div class="signature-line"></div>
+                <div class="signature-label">IT Department Signature</div>
+            </div>
+            
+            <div class="signature-area">
+                <div class="personnel-name">
+                    Employee Name: <span class="personnel-name-field">{{ asset_return.employee_returning|default:" " }}</span>
+                </div>
+                <div class="signature-line"></div>
+                <div class="signature-label">Employee Signature</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">RETURN NOTES:</div>
+            <div style="border: 1px solid #000; min-height: 60px; padding: 5px; margin-top: 5px;">
+                <!-- Space for return notes -->
+            </div>
+        </div>
+    </div>
 
-{% block content %}
-<h1>Asset Return Detail</h1>
-
-    <h2>Asset Allocation Details:</h2>
-    <p>Asset Name: {{ asset_return.asset.name }}</p>
-    <p>Serial Number: {{ asset_return.asset.serial_number }}</p>
-    <p>Assigned To: {{ asset_return.employee_returning }}</p>
-    <p>Company: {{ asset_return.asset.company }}</p>
-    <p>Asset Status: {{ asset_return.asset_status }}</p>
-    <p>Return Date: {{ asset_return.return_date }}</p>
-
-
-
-    <h3>IT Manager's Signature:</h3>
-    <h3>Employee's Signature:</h3>
-    <!-- Add other asset fields as needed -->
-{% endblock %}
+    <div class="action-buttons no-print">
+        <button class="btn btn-print" onclick="window.print()">Print Form</button>
+        <a href="{% url 'asset_list' %}" class="btn" style="background-color: #95a5a6; color: white;">Back to Assets</a>
+    </div>
+</body>
+</html>

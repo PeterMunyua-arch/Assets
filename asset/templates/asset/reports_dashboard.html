@@ -1,161 +1,375 @@
 {% extends 'asset/base.html' %}
 {% load static %}
+{% load humanize %}
 
-{% block title %}Reports Dashboard{% endblock %}
+{% block title %}Asset Reports Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0">
-                    <h6>Reports Dashboard</h6>
-                </div>
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Total Assets</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_assets }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-laptop fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<div class="container-fluid py-3">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="h4 mb-1 text-gray-800">Asset Reports Dashboard</h1>
+        </div>
+        <div>
+            <a href="{% url 'asset_report' 'total_assets' %}?format=excel" class="btn btn-sm btn-success">
+                <i class="fas fa-download fa-sm mr-1"></i>Export All
+            </a>
+        </div>
+    </div>
 
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-success shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Allocated Assets</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ allocated_assets }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- Summary Cards - Compact Version -->
+    <div class="row mb-3">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-primary shadow-sm h-100">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Assets</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">{{ total_assets|intcomma }}</div>
                         </div>
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-info shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                                Unallocated Assets</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ unallocated_assets }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-auto">
+                            <i class="fas fa-laptop fa-lg text-gray-300"></i>
                         </div>
                     </div>
+                    <div class="mt-2">
+                        <a href="{% url 'asset_report' 'total_assets' %}?format=excel" class="btn btn-sm btn-outline-primary btn-block">
+                            <i class="fas fa-download fa-xs mr-1"></i>Export
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5>Available Reports</h5>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-success shadow-sm h-100">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Allocated</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">{{ allocated_assets|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-check fa-lg text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <a href="{% url 'export_allocated_assets' %}" class="btn btn-sm btn-outline-success btn-block">
+                            <i class="fas fa-download fa-xs mr-1"></i>Export
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-info shadow-sm h-100">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Available</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">{{ unallocated_assets|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box-open fa-lg text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <a href="{% url 'export_unallocated_assets' %}" class="btn btn-sm btn-outline-info btn-block">
+                            <i class="fas fa-download fa-xs mr-1"></i>Export
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-warning shadow-sm h-100">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Companies</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">{{ companies.count|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-lg text-gray-300"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge badge-light">{{ departments.count }} departments</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Reports Section - Compact Layout -->
+    <div class="row">
+        <!-- Company Reports -->
+        <div class="col-lg-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-2 bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-building fa-sm mr-1"></i>By Company / Principal
+                        <span class="badge badge-primary badge-pill ml-1">{{ companies.count }}</span>
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Company</th>
+                                    <th class="text-center">Assets</th>
+                                    <th class="text-center">Allocated</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for company in companies %}
+                                <tr>
+                                    <td>
+                                        <div class="font-weight-bold text-sm">{{ company.name|truncatechars:20 }}</div>
+                                        
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <span class="badge badge-light">{{ company.asset_count }}</span>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <span class="badge badge-success">{{ company.allocated_count }}</span>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'company_assets_report' company.id %}" class="btn btn-outline-primary btn-sm" title="View">
+                                                <i class="fas fa-eye fa-xs"></i>
+                                            </a>
+                                            <a href="{% url 'export_company_assets' company.id %}" class="btn btn-outline-success btn-sm" title="Download">
+                                                <i class="fas fa-download fa-xs"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted">
+                                        <i class="fas fa-building fa-2x mb-2"></i>
+                                        <p class="small mb-0">No companies found</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Reports -->
+        <div class="col-lg-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-2 bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-sitemap fa-sm mr-1"></i>By Department
+                        <span class="badge badge-primary badge-pill ml-1">{{ departments.count }}</span>
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush">
+                        {% for department in departments|slice:":5" %}
+                        <div class="list-group-item p-2 border-0">
+                            <div class="d-flex align-items-center">
+                                <div class="mr-2">
+                                    <i class="fas fa-sitemap text-primary fa-sm"></i>
                                 </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Total Assets Report</h5>
-                                                    <p class="card-text">Complete inventory of all assets in the system</p>
-                                                    <a href="{% url 'asset_report' 'total_assets' %}?format=excel" class="btn btn-primary">
-                                                        <i class="fas fa-download"></i> Download Excel
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Allocated Assets Report</h5>
-                                                    <p class="card-text">Assets currently assigned to employees</p>
-                                                    <a href="{% url 'asset_report' 'allocated_assets' %}?format=excel" class="btn btn-primary">
-                                                        <i class="fas fa-download"></i> Download Excel
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Unallocated Assets Report</h5>
-                                                    <p class="card-text">Assets available for assignment</p>
-                                                    <a href="{% url 'asset_report' 'unallocated_assets' %}?format=excel" class="btn btn-primary">
-                                                        <i class="fas fa-download"></i> Download Excel
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Assets by Status</h5>
-                                                    <p class="card-text">Assets grouped by their status (New, Old, Damaged)</p>
-                                                    <div class="dropdown">
-                                                        <button class="btn btn-primary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <i class="fas fa-download"></i> Download by Status
-                                                        </button>
-                                                        <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_status' %}?format=excel">All Statuses</a></li>
-                                                            {% for status_key, status_name in status_choices %}
-                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_status' %}?status={{ status_key }}&format=excel">{{ status_name }}</a></li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Assets by Department</h5>
-                                                    <p class="card-text">Assets grouped by employee department</p>
-                                                    <div class="dropdown">
-                                                        <button class="btn btn-primary dropdown-toggle" type="button" id="deptDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <i class="fas fa-download"></i> Download by Department
-                                                        </button>
-                                                        <ul class="dropdown-menu" aria-labelledby="deptDropdown">
-                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_department' %}?format=excel">All Departments</a></li>
-                                                            {% for department in departments %}
-                                                            <li><a class="dropdown-item" href="{% url 'asset_report' 'by_department' %}?department={{ department }}&format=excel">{{ department }}</a></li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div class="flex-grow-1">
+                                    <div class="text-sm font-weight-bold text-gray-800">{{ department|truncatechars:25 }}</div>
+                                </div>
+                                <div>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'department_assets_report' department %}" class="btn btn-outline-primary btn-sm" title="View">
+                                            <i class="fas fa-eye fa-xs"></i>
+                                        </a>
+                                        <a href="{% url 'export_department_assets' department %}" class="btn btn-outline-success btn-sm" title="Download">
+                                            <i class="fas fa-download fa-xs"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        {% empty %}
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-sitemap fa-2x mb-2"></i>
+                            <p class="small mb-0">No departments found</p>
+                        </div>
+                        {% endfor %}
+                        {% if departments.count > 5 %}
+                        <div class="text-center mt-2">
+                            <a href="#" class="btn btn-sm btn-outline-secondary">
+                                View all {{ departments.count }} departments
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asset Type Reports -->
+        <div class="col-lg-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-2 bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-laptop fa-sm mr-1"></i>By Asset Type
+                        <span class="badge badge-primary badge-pill ml-1">{{ asset_type_counts|length }}</span>
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush">
+                        {% for asset_type in asset_type_counts %}
+                        <div class="list-group-item p-2 border-0">
+                            <div class="d-flex align-items-center">
+                                <div class="mr-2">
+                                    {% if asset_type.type_code == 'laptop' %}
+                                    <i class="fas fa-laptop text-primary"></i>
+                                    {% elif asset_type.type_code == 'desktop' %}
+                                    <i class="fas fa-desktop text-info"></i>
+                                    {% elif asset_type.type_code == 'mobile' %}
+                                    <i class="fas fa-mobile-alt text-success"></i>
+                                    {% elif asset_type.type_code == 'tablet' %}
+                                    <i class="fas fa-tablet-alt text-warning"></i>
+                                    {% elif asset_type.type_code == 'printer' %}
+                                    <i class="fas fa-print text-danger"></i>
+                                    {% else %}
+                                    <i class="fas fa-cube text-secondary"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="text-sm font-weight-bold text-gray-800">{{ asset_type.type_name }}</div>
+                                    <div class="text-xs text-muted">
+                                        {{ asset_type.total_count }} total, {{ asset_type.allocated_count }} allocated
+                                    </div>
+                                </div>
+                                <div>
+                                    <a href="{% url 'asset_type_report' asset_type.type_code %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-download fa-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Reports -->
+        <div class="col-lg-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-2 bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-tags fa-sm mr-1"></i>By Status
+                        <span class="badge badge-primary badge-pill ml-1">{{ status_choices|length }}</span>
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row">
+                        {% for status_key, status_name in status_choices %}
+                        <div class="col-6 mb-2">
+                            <div class="card bg-light border-0 h-100">
+                                <div class="card-body text-center p-2">
+                                    {% if status_key == 'new' %}
+                                    <i class="fas fa-certificate fa-lg text-success mb-1"></i>
+                                    {% elif status_key == 'used' %}
+                                    <i class="fas fa-laptop-code fa-lg text-primary mb-1"></i>
+                                    {% elif status_key == 'damaged' %}
+                                    <i class="fas fa-exclamation-triangle fa-lg text-danger mb-1"></i>
+                                    {% elif status_key == 'repair' %}
+                                    <i class="fas fa-tools fa-lg text-warning mb-1"></i>
+                                    {% else %}
+                                    <i class="fas fa-question-circle fa-lg text-secondary mb-1"></i>
+                                    {% endif %}
+                                    <h6 class="card-title mb-1 text-sm">{{ status_name }}</h6>
+                                    <a href="{% url 'asset_report' 'status' %}?status={{ status_key }}&format=excel" class="btn btn-xs btn-outline-dark">
+                                        <i class="fas fa-download fa-xs mr-1"></i>Export
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .card {
+        border: 1px solid #e3e6f0;
+        border-radius: 0.35rem;
+        transition: all 0.15s ease;
+    }
+    
+    .card:hover {
+        box-shadow: 0 0.15rem 1rem rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    
+    .border-left-primary { border-left: 3px solid #4e73df !important; }
+    .border-left-success { border-left: 3px solid #1cc88a !important; }
+    .border-left-info { border-left: 3px solid #36b9cc !important; }
+    .border-left-warning { border-left: 3px solid #f6c23e !important; }
+    
+    .btn-group-sm > .btn,
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+    
+    .btn-xs {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.65rem;
+        line-height: 1.2;
+        border-radius: 0.15rem;
+    }
+    
+    .table th {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.5rem;
+    }
+    
+    .table td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .text-xs {
+        font-size: 0.7rem;
+    }
+    
+    .text-sm {
+        font-size: 0.8rem;
+    }
+    
+    .badge-pill {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .list-group-item {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        margin-bottom: 0.25rem;
+        border-radius: 0.25rem;
+    }
+</style>
 {% endblock %}
